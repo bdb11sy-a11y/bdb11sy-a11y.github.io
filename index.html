@@ -12,7 +12,7 @@ body{
   direction:rtl;
 }
 
-/* ===== Header ===== */
+/* Header */
 header{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
@@ -22,7 +22,14 @@ header{
   font-weight:bold;
 }
 
-/* ===== Apps ===== */
+#welcome{
+  text-align:center;
+  color:#fff;
+  margin-top:8px;
+  font-weight:bold;
+}
+
+/* Apps */
 .apps{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
@@ -52,13 +59,12 @@ header{
   margin-bottom:8px;
 }
 
-/* ألوان خاصة */
 .app.likee{border-top:5px solid #ff4da6;}
 .app.yahlan{border-top:5px solid #00b894;}
 .app.fun4{border-top:5px solid #fbc531;}
 .app.jawaker{border-top:5px solid #0984e3;}
 
-/* ===== Order Box ===== */
+/* Order Box */
 .order{
   display:none;
   background:#fff;
@@ -71,12 +77,11 @@ header{
 .order h3{
   margin-top:0;
   margin-bottom:15px;
-  color:#222;
   border-bottom:2px solid #eee;
   padding-bottom:8px;
 }
 
-/* ===== Price Buttons ===== */
+/* Prices */
 .price-btn{
   display:block;
   width:100%;
@@ -88,18 +93,15 @@ header{
   cursor:pointer;
   font-size:15px;
   font-weight:bold;
-  color:#333;
-  transition:.2s;
 }
 
 .price-btn.active{
   background:linear-gradient(135deg,#6a11cb,#2575fc);
   color:#fff;
   border:none;
-  box-shadow:0 6px 15px rgba(106,17,203,.4);
 }
 
-/* ===== Inputs & Buttons ===== */
+/* Inputs & Buttons */
 input{
   width:100%;
   padding:12px;
@@ -122,7 +124,7 @@ button{
   font-weight:bold;
 }
 
-/* ===== Success Message ===== */
+/* Success */
 #success{
   display:none;
   background:#e6fffa;
@@ -138,20 +140,18 @@ button{
 <body>
 
 <header>العبادي – شحن التطبيقات</header>
+<div id="welcome"></div>
 
 <div class="apps">
   <div class="app likee" onclick="openOrder('Likee')">
     <img src="likee.jpg"> لايكي
   </div>
-
   <div class="app yahlan" onclick="openOrder('Yahlan')">
     <img src="yahlan.jpg"> ياهلان شات
   </div>
-
   <div class="app fun4" onclick="openOrder('4Fun')">
     <img src="4fun.jpg"> 4Fun
   </div>
-
   <div class="app jawaker" onclick="openOrder('Jawaker')">
     <img src="jawaker.jpg"> جواكر
   </div>
@@ -173,12 +173,19 @@ button{
 </div>
 
 <script>
+// قراءة اسم المستخدم من الرابط
+const params = new URLSearchParams(window.location.search);
+const username = params.get("user");
+if(username){
+  document.getElementById("welcome").innerText = "مرحبًا " + username;
+}
+
 let selectedApp = "";
 let selectedPrice = "";
 
-/* ===== الأسعار ===== */
+// الأسعار
 const prices = {
-  Likee: [
+  Likee:[
     "1000 مجوهرة – 950 TL",
     "1500 مجوهرة – 1375 TL",
     "2000 مجوهرة – 1850 TL",
@@ -186,7 +193,7 @@ const prices = {
     "4000 مجوهرة – 3750 TL",
     "5000 مجوهرة – 4700 TL"
   ],
-  Yahlan: [
+  Yahlan:[
     "1000 مجوهرة – 125 TL",
     "2000 مجوهرة – 225 TL",
     "5000 مجوهرة – 475 TL",
@@ -194,14 +201,14 @@ const prices = {
     "20000 مجوهرة – 1850 TL",
     "50000 مجوهرة – 4850 TL"
   ],
-  "4Fun": [
+  "4Fun":[
     "300K دايموند – 950 TL",
     "500K دايموند – 1700 TL",
     "600K دايموند – 1850 TL",
     "1M دايموند – 3200 TL",
     "1.5M دايموند – 4650 TL"
   ],
-  Jawaker: [
+  Jawaker:[
     "10K كوينز – 100 TL",
     "20K كوينز – 175 TL",
     "25K كوينز – 200 TL",
@@ -224,20 +231,20 @@ function openOrder(app){
   let box = document.getElementById("prices");
   box.innerHTML = "";
 
-  prices[app].forEach(p => {
+  prices[app].forEach(p=>{
     let btn = document.createElement("button");
     btn.className = "price-btn";
     btn.innerText = p;
-    btn.onclick = () => {
-      document.querySelectorAll(".price-btn").forEach(b => b.classList.remove("active"));
+    btn.onclick = ()=>{
+      document.querySelectorAll(".price-btn").forEach(b=>b.classList.remove("active"));
       btn.classList.add("active");
       selectedPrice = p;
     };
     box.appendChild(btn);
   });
 
-  document.getElementById("orderBox").style.display = "block";
-  window.scrollTo(0, document.body.scrollHeight);
+  document.getElementById("orderBox").style.display="block";
+  window.scrollTo(0,document.body.scrollHeight);
 }
 
 function sendOrder(){
@@ -247,7 +254,7 @@ function sendOrder(){
     return;
   }
 
-  /* 🔑 ضع توكن البوت هنا */
+  // 🔑 ضع توكن البوت هنا
   let token = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
   let chatId = "154287241";
 
@@ -255,6 +262,7 @@ function sendOrder(){
 
   let text =
     "🆕 طلب جديد\n\n" +
+    "👤 المستخدم: " + (username ? username : "زائر") + "\n" +
     "📦 رقم الطلب: #" + orderId + "\n" +
     "📱 التطبيق: " + selectedApp + "\n" +
     "💰 الباقة: " + selectedPrice + "\n" +
@@ -265,18 +273,18 @@ function sendOrder(){
     "/sendMessage?chat_id=" + chatId +
     "&text=" + encodeURIComponent(text)
   )
-  .then(() => {
+  .then(()=>{
     let s = document.getElementById("success");
-    s.style.display = "block";
-    s.innerText = "✅ تم استلام طلبك بنجاح\nرقم الطلب: #" + orderId;
+    s.style.display="block";
+    s.innerText="✅ تم استلام طلبك\nرقم الطلب: #" + orderId;
   })
-  .catch(() => {
+  .catch(()=>{
     alert("❌ فشل إرسال الطلب");
   });
 }
 
 function openWhatsApp(){
-  window.open("https://wa.me/905396956440", "_blank");
+  window.open("https://wa.me/905396956440","_blank");
 }
 </script>
 
