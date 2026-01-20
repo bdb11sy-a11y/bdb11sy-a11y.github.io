@@ -107,13 +107,26 @@
       return;
     }
 
-    let message =
-      "طلب جديد\n" +
-      "التطبيق: " + selectedApp + "\n" +
-      "القيمة: " + amount + "\n" +
-      "ID: " + id;
+    // 🔴 هنا فقط الصق التوكن مالك
+    let token = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
 
-    alert("تم إرسال الطلب!\n\n" + message);
+    // 🟢 هذا Chat ID مالك (جاهز)
+    let chatId = "154287241";
+
+    let text =
+      "🆕 طلب جديد\n\n" +
+      "📱 التطبيق: " + selectedApp + "\n" +
+      "💰 المبلغ: " + amount + "$\n" +
+      "🆔 ID: " + id;
+
+    let url =
+      "https://api.telegram.org/bot" + token +
+      "/sendMessage?chat_id=" + chatId +
+      "&text=" + encodeURIComponent(text);
+
+    fetch(url)
+      .then(() => alert("تم إرسال الطلب بنجاح ✅"))
+      .catch(() => alert("صار خطأ ❌"));
   }
 </script>
 
