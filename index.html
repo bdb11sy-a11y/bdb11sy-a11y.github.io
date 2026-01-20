@@ -6,133 +6,90 @@
 
 <style>
 body{
-  font-family: Arial, sans-serif;
-  background:#f2f3f7;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,#eef2f7,#ffffff);
   margin:0;
   direction:rtl;
 }
-
-/* Header */
 header{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
   padding:18px;
   text-align:center;
   font-size:22px;
-  font-weight:bold;
 }
-
-#welcome{
-  text-align:center;
-  color:#fff;
-  margin-top:8px;
-  font-weight:bold;
-}
-
-/* Apps */
 .apps{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
   gap:15px;
   padding:20px;
 }
-
 .app{
   background:#fff;
   border-radius:14px;
   padding:12px;
   text-align:center;
   cursor:pointer;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-  transition:.25s;
+  box-shadow:0 6px 15px rgba(0,0,0,.08);
 }
-
-.app:hover{
-  transform:translateY(-4px);
-  box-shadow:0 8px 20px rgba(0,0,0,.15);
-}
-
-.app img{
-  width:60px;
-  height:60px;
-  object-fit:contain;
-  margin-bottom:8px;
-}
-
-.app.likee{border-top:5px solid #ff4da6;}
-.app.yahlan{border-top:5px solid #00b894;}
-.app.fun4{border-top:5px solid #fbc531;}
-.app.jawaker{border-top:5px solid #0984e3;}
-
-/* Order Box */
+.app img{width:60px;height:60px;object-fit:contain;margin-bottom:6px}
 .order{
   display:none;
   background:#fff;
   margin:20px;
   padding:20px;
-  border-radius:14px;
-  box-shadow:0 6px 20px rgba(0,0,0,.1);
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.1);
 }
-
-.order h3{
-  margin-top:0;
-  margin-bottom:15px;
-  border-bottom:2px solid #eee;
-  padding-bottom:8px;
-}
-
-/* Prices */
 .price-btn{
-  display:block;
   width:100%;
-  padding:12px;
+  padding:14px;
   margin:8px 0;
-  border-radius:10px;
-  border:2px solid #e0e0e0;
-  background:#f7f7f7;
-  cursor:pointer;
-  font-size:15px;
+  border:none;
+  border-radius:14px;
+  background:#f1f5f9;
+  font-size:16px;
   font-weight:bold;
+  cursor:pointer;
 }
-
 .price-btn.active{
   background:linear-gradient(135deg,#6a11cb,#2575fc);
   color:#fff;
-  border:none;
 }
-
-/* Inputs & Buttons */
-input{
+input,textarea,button{
   width:100%;
   padding:12px;
-  margin-top:15px;
+  margin-top:10px;
   font-size:16px;
-  border-radius:10px;
-  border:2px solid #ddd;
-}
-
-button{
-  width:100%;
-  padding:14px;
-  margin-top:15px;
-  font-size:17px;
   border-radius:12px;
-  background:linear-gradient(135deg,#111,#333);
+}
+button{
+  background:#111;
   color:#fff;
   border:none;
   cursor:pointer;
-  font-weight:bold;
 }
-
-/* Success */
-#success{
+.confirm{
   display:none;
-  background:#e6fffa;
-  color:#065f46;
+  background:#fff3cd;
   padding:15px;
-  border-radius:10px;
-  margin-top:15px;
-  font-weight:bold;
+  margin-top:12px;
+  border-radius:12px;
+}
+.confirm button{
+  margin-top:8px;
+}
+.yes{background:#16a34a!important}
+.edit{background:#f59e0b!important;color:#111!important}
+.note{background:#ffb703!important;color:#111!important}
+.whatsapp{background:#25d366!important}
+.success{
+  display:none;
+  background:#e6fff4;
+  color:#065f46;
+  padding:12px;
+  margin-top:12px;
+  border-radius:12px;
 }
 </style>
 </head>
@@ -140,21 +97,12 @@ button{
 <body>
 
 <header>العبادي – شحن التطبيقات</header>
-<div id="welcome"></div>
 
 <div class="apps">
-  <div class="app likee" onclick="openOrder('Likee')">
-    <img src="likee.jpg"> لايكي
-  </div>
-  <div class="app yahlan" onclick="openOrder('Yahlan')">
-    <img src="yahlan.jpg"> ياهلان شات
-  </div>
-  <div class="app fun4" onclick="openOrder('4Fun')">
-    <img src="4fun.jpg"> 4Fun
-  </div>
-  <div class="app jawaker" onclick="openOrder('Jawaker')">
-    <img src="jawaker.jpg"> جواكر
-  </div>
+  <div class="app" onclick="openOrder('Likee')"><img src="likee.jpg">لايكي</div>
+  <div class="app" onclick="openOrder('Yahlan')"><img src="yahlan.jpg">ياهـلان</div>
+  <div class="app" onclick="openOrder('4Fun')"><img src="4fun.jpg">4Fun</div>
+  <div class="app" onclick="openOrder('Jawaker')"><img src="jawaker.jpg">جواكر</div>
 </div>
 
 <div class="order" id="orderBox">
@@ -163,128 +111,98 @@ button{
 
   <input type="text" id="userid" placeholder="اكتب ID الحساب">
 
-  <button onclick="sendOrder()">إرسال الطلب</button>
+  <button onclick="prepareConfirm()">إرسال الطلب</button>
 
-  <div id="success"></div>
+  <div class="confirm" id="confirmBox">
+    <p>❓ هل أنت متأكد من إرسال الطلب؟</p>
+    <button class="yes" onclick="sendOrder()">✅ نعم، أرسل</button>
+    <button class="edit" onclick="editOrder()">✏️ تعديل الطلب</button>
+  </div>
 
-  <button onclick="openWhatsApp()" style="background:#25D366;margin-top:10px;">
-    تواصل عبر واتساب
-  </button>
+  <button class="note" onclick="openNote()">✉️ إرسال ملاحظة</button>
+
+  <div id="noteBox" style="display:none">
+    <textarea id="noteText" placeholder="اكتب ملاحظتك..."></textarea>
+    <button class="note" onclick="sendNote()">إرسال الملاحظة</button>
+  </div>
+
+  <div class="success" id="successBox"></div>
+
+  <a href="https://wa.me/905396956440" target="_blank">
+    <button class="whatsapp">📞 تواصل واتساب</button>
+  </a>
 </div>
 
 <script>
-// قراءة اسم المستخدم من الرابط
-const params = new URLSearchParams(window.location.search);
-const username = params.get("user");
-if(username){
-  document.getElementById("welcome").innerText = "مرحبًا " + username;
-}
+let selectedApp="",selectedPrice="";
 
-let selectedApp = "";
-let selectedPrice = "";
-
-// الأسعار
-const prices = {
-  Likee:[
-    "1000 مجوهرة – 950 TL",
-    "1500 مجوهرة – 1375 TL",
-    "2000 مجوهرة – 1850 TL",
-    "3000 مجوهرة – 2900 TL",
-    "4000 مجوهرة – 3750 TL",
-    "5000 مجوهرة – 4700 TL"
-  ],
-  Yahlan:[
-    "1000 مجوهرة – 125 TL",
-    "2000 مجوهرة – 225 TL",
-    "5000 مجوهرة – 475 TL",
-    "10000 مجوهرة – 950 TL",
-    "20000 مجوهرة – 1850 TL",
-    "50000 مجوهرة – 4850 TL"
-  ],
-  "4Fun":[
-    "300K دايموند – 950 TL",
-    "500K دايموند – 1700 TL",
-    "600K دايموند – 1850 TL",
-    "1M دايموند – 3200 TL",
-    "1.5M دايموند – 4650 TL"
-  ],
-  Jawaker:[
-    "10K كوينز – 100 TL",
-    "20K كوينز – 175 TL",
-    "25K كوينز – 200 TL",
-    "30K كوينز – 250 TL",
-    "50K كوينز – 350 TL",
-    "70K كوينز – 500 TL",
-    "100K كوينز – 650 TL",
-    "200K كوينز – 1250 TL",
-    "300K كوينز – 1850 TL",
-    "500K كوينز – 3000 TL",
-    "1M كوينز – 5300 TL"
-  ]
+const prices={
+ Likee:["1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL","3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"],
+ Yahlan:["1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL","10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"],
+ "4Fun":["300K ♦ – 950 TL","500K ♦ – 1700 TL","600K ♦ – 1850 TL","1M ♦ – 3200 TL","1.5M ♦ – 4650 TL"],
+ Jawaker:["10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL","30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL","100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL","500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"]
 };
 
 function openOrder(app){
-  selectedApp = app;
-  selectedPrice = "";
-  document.getElementById("appName").innerText = "طلب شحن: " + app;
+ selectedApp=app; selectedPrice="";
+ document.getElementById("appName").innerText="طلب شحن: "+app;
+ let box=document.getElementById("prices"); box.innerHTML="";
+ prices[app].forEach(p=>{
+  let b=document.createElement("button");
+  b.className="price-btn"; b.innerText=p;
+  b.onclick=()=>{
+    document.querySelectorAll(".price-btn").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); selectedPrice=p;
+  };
+  box.appendChild(b);
+ });
+ document.getElementById("orderBox").style.display="block";
+}
 
-  let box = document.getElementById("prices");
-  box.innerHTML = "";
+function prepareConfirm(){
+ let id=document.getElementById("userid").value;
+ if(!id||!selectedPrice){alert("اختر الباقة واكتب ID");return;}
+ document.getElementById("confirmBox").style.display="block";
+}
 
-  prices[app].forEach(p=>{
-    let btn = document.createElement("button");
-    btn.className = "price-btn";
-    btn.innerText = p;
-    btn.onclick = ()=>{
-      document.querySelectorAll(".price-btn").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedPrice = p;
-    };
-    box.appendChild(btn);
-  });
-
-  document.getElementById("orderBox").style.display="block";
-  window.scrollTo(0,document.body.scrollHeight);
+function editOrder(){
+ document.getElementById("confirmBox").style.display="none";
 }
 
 function sendOrder(){
-  let id = document.getElementById("userid").value;
-  if(!id || !selectedPrice){
-    alert("اختر الباقة واكتب ID");
-    return;
-  }
+ let id=document.getElementById("userid").value;
+ let token="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // 🔴 ضع التوكن هنا
+ let chatId="154287241";
+ let order=Math.floor(Math.random()*900000)+100000;
 
-  // 🔑 ضع توكن البوت هنا
-  let token = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
-  let chatId = "154287241";
+ let text=
+ "🆕 طلب جديد\n\n"+
+ "📱 التطبيق: "+selectedApp+"\n"+
+ "💰 الباقة: "+selectedPrice+"\n"+
+ "🆔 ID: "+id+"\n"+
+ "🧾 رقم الطلب: "+order;
 
-  let orderId = Math.floor(100000 + Math.random() * 900000);
-
-  let text =
-    "🆕 طلب جديد\n\n" +
-    "👤 المستخدم: " + (username ? username : "زائر") + "\n" +
-    "📦 رقم الطلب: #" + orderId + "\n" +
-    "📱 التطبيق: " + selectedApp + "\n" +
-    "💰 الباقة: " + selectedPrice + "\n" +
-    "🆔 ID: " + id;
-
-  fetch(
-    "https://api.telegram.org/bot" + token +
-    "/sendMessage?chat_id=" + chatId +
-    "&text=" + encodeURIComponent(text)
-  )
-  .then(()=>{
-    let s = document.getElementById("success");
-    s.style.display="block";
-    s.innerText="✅ تم استلام طلبك\nرقم الطلب: #" + orderId;
-  })
-  .catch(()=>{
-    alert("❌ فشل إرسال الطلب");
-  });
+ fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`)
+ .then(()=>{
+  let s=document.getElementById("successBox");
+  s.innerHTML="✅ تم إرسال الطلب<br>رقم الطلب: <b>"+order+"</b>";
+  s.style.display="block";
+  document.getElementById("confirmBox").style.display="none";
+ });
 }
 
-function openWhatsApp(){
-  window.open("https://wa.me/905396956440","_blank");
+function openNote(){
+ document.getElementById("noteBox").style.display="block";
+}
+
+function sendNote(){
+ let note=document.getElementById("noteText").value;
+ if(!note)return;
+ let token="PUT_YOUR_BOT_TOKEN_HERE";
+ let chatId="154287241";
+
+ fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent("✉️ ملاحظة:\n"+note)}`)
+ .then(()=>alert("تم إرسال الملاحظة"));
 }
 </script>
 
