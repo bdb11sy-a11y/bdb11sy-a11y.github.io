@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>لوحة التحكم – العبادي</title>
+
+<style>
+body{
+  font-family:Arial;
+  background:#f1f5f9;
+  margin:0;
+  direction:rtl;
+}
+header{
+  background:#111827;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+}
+.container{padding:20px}
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:14px;
+  margin-bottom:15px;
+  box-shadow:0 6px 15px rgba(0,0,0,.1);
+}
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  font-size:16px;
+}
+button{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+}
+.order{
+  border-bottom:1px dashed #ddd;
+  padding:10px 0;
+}
+.status{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:13px;
+}
+.new{background:#fde68a}
+.progress{background:#93c5fd}
+.done{background:#86efac}
+.cancel{background:#fca5a5}
+</style>
+</head>
+
+<body>
+
+<header>لوحة التحكم – العبادي</header>
+
+<div class="container">
+
+<div class="card" id="loginBox">
+  <h3>دخول الإدارة</h3>
+  <input type="password" id="adminPass" placeholder="كلمة السر">
+  <button onclick="login()">دخول</button>
+</div>
+
+<div class="card" id="panel" style="display:none">
+  <h3>📦 جميع الطلبات</h3>
+  <div id="orders"></div>
+</div>
+
+</div>
+
+<script>
+const ADMIN_PASS="235100";
+
+function login(){
+  if(adminPass.value!==ADMIN_PASS) return alert("كلمة السر خاطئة");
+  loginBox.style.display="none";
+  panel.style.display="block";
+  loadOrders();
+}
+
+function loadOrders(){
+  let box=document.getElementById("orders");
+  box.innerHTML="";
+  for(let k in localStorage){
+    if(k.startsWith("orders_")){
+      let user=k.replace("orders_","");
+      let arr=JSON.parse(localStorage.getItem(k)||"[]");
+      arr.forEach((o,i)=>{
+        let d=document.createElement("div");
+        d.className="order";
+        d.innerHTML=`
+          <b>${user}</b><br>
+          ${o.app} | ${o.pack}<br>
+          🆔 ${o.id || ""}<br>
+          🕒 ${o.time || ""}<br>
+          الحالة:
+          <select onchange="setStatus('${k}',${i},this.value)">
+            <option ${o.status=="new"?"selected":""} value="new">جديد</option>
+            <option ${o.status=="progress"?"selected":""} value="progress">قيد التنفيذ</option>
+            <option ${o.status=="done"?"selected":""} value="done">تم</option>
+            <option ${o.status=="cancel"?"selected":""} value="cancel">ملغي</option>
+          </select>
+        `;
+        box.appendChild(d);
+      });
+    }
+  }
+}
+
+function setStatus(key,i,val){
+  let arr=JSON.parse(localStorage.getItem(key));
+  arr[i].status=val;
+  localStorage.setItem(key,JSON.stringify(arr));
+}
+</script>
+
+</body>
+</html>
