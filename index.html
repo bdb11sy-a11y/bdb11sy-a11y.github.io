@@ -5,244 +5,227 @@
 <title>Alabbadi Services</title>
 
 <style>
+:root{
+  --main:#0f172a;
+  --card:#ffffff;
+  --bg:#f1f5f9;
+}
 body{
-  font-family:Arial,sans-serif;
-  background:#f1f5f9;
   margin:0;
+  font-family:Arial;
+  background:var(--bg);
   direction:rtl;
 }
 header{
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
-  padding:18px;
+  padding:15px;
   text-align:center;
   font-size:22px;
 }
-#welcome{
-  text-align:center;
-  margin:10px;
-  font-weight:bold;
-}
-.section{
-  background:#fff;
-  margin:15px;
+.container{padding:20px}
+.card{
+  background:var(--card);
+  border-radius:12px;
   padding:15px;
-  border-radius:14px;
-  box-shadow:0 6px 15px rgba(0,0,0,.1);
+  margin-bottom:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
-.apps div{
+input,button,select{
+  width:100%;
   padding:10px;
-  border-radius:10px;
-  background:#f1f5f9;
-  margin-bottom:6px;
-  cursor:pointer;
-  font-weight:bold;
-}
-.apps div:hover{background:#e2e8f0}
-.price-btn{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border:none;
-  border-radius:12px;
-  background:#f1f5f9;
-  font-weight:bold;
-}
-.price-btn.active{
-  background:#2563eb;
-  color:#fff;
-}
-input,textarea,button{
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:12px;
+  margin-top:10px;
   font-size:16px;
 }
 button{
-  background:#111;
+  background:var(--main);
   color:#fff;
   border:none;
+  border-radius:8px;
   cursor:pointer;
 }
-.confirm{
-  display:none;
-  background:#fff3cd;
-  padding:12px;
-  border-radius:12px;
-  margin-top:10px;
+button.green{background:#22c55e}
+button.orange{background:#f59e0b}
+button.gray{background:#64748b}
+.price{
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  margin-top:8px;
+  cursor:pointer;
 }
-.success{
-  display:none;
-  background:#e6fff4;
-  color:#065f46;
-  padding:12px;
-  border-radius:12px;
-  margin-top:10px;
+.price.active{
+  background:#2563eb;
+  color:#fff;
 }
-.history-item{
-  background:#f8fafc;
-  padding:8px;
-  border-radius:10px;
-  margin-bottom:5px;
-  font-size:14px;
+.hidden{display:none}
+.lang{
+  position:absolute;
+  left:10px;
+  top:10px;
 }
-.note{background:#f59e0b;color:#111}
-.whatsapp{background:#25d366}
+.lang button{
+  width:auto;
+  padding:5px 10px;
+  margin:2px;
+}
 </style>
 </head>
 
 <body>
 
-<header>العبادي – شحن التطبيقات</header>
-<div id="welcome"></div>
+<header>
+  العبادي – شحن التطبيقات
+  <div class="lang">
+    <button onclick="setLang('ar')">AR</button>
+    <button onclick="setLang('en')">EN</button>
+    <button onclick="setLang('tr')">TR</button>
+  </div>
+</header>
 
-<div class="section apps">
-  <div onclick="openOrder('Likee')">لايكي</div>
-  <div onclick="openOrder('Yahlan')">ياهـلان</div>
-  <div onclick="openOrder('4Fun')">4Fun</div>
-  <div onclick="openOrder('Jawaker')">جواكر</div>
+<div class="container">
+
+<!-- تسجيل الدخول -->
+<div class="card" id="loginBox">
+  <h3>تسجيل الدخول</h3>
+  <select id="user">
+    <option value="">اختر المستخدم</option>
+    <option value="Mostafa">Mostafa</option>
+    <option value="Adi">Adi</option>
+  </select>
+  <input type="password" id="pass" placeholder="كلمة السر">
+  <button onclick="login()">دخول</button>
 </div>
 
-<div class="section" id="orderBox" style="display:none">
-  <h3 id="appName"></h3>
+<!-- الطلب -->
+<div class="card hidden" id="orderBox">
+  <h3 id="welcome"></h3>
+
+  <select id="app" onchange="loadPrices()">
+    <option value="">اختر التطبيق</option>
+    <option value="Likee">Likee</option>
+    <option value="Yahlan">Yahlan</option>
+    <option value="4Fun">4Fun</option>
+    <option value="Jawaker">Jawaker</option>
+  </select>
+
   <div id="prices"></div>
-  <input id="userid" placeholder="اكتب ID الحساب">
 
-  <button onclick="prepareConfirm()">إرسال الطلب</button>
+  <input id="userid" placeholder="ID الحساب">
 
-  <div class="confirm" id="confirmBox">
-    هل أنت متأكد؟
-    <button onclick="sendOrder()">✅ نعم</button>
-    <button onclick="editOrder()" class="note">✏️ تعديل</button>
-  </div>
-
-  <button onclick="openNote()" class="note">✉️ إرسال ملاحظة</button>
-
-  <div id="noteBox" style="display:none">
-    <textarea id="noteText" placeholder="اكتب ملاحظتك"></textarea>
-    <button onclick="sendNote()" class="note">إرسال الملاحظة</button>
-  </div>
-
-  <div id="successBox" class="success"></div>
-
-  <button onclick="openWhatsApp()" class="whatsapp">📞 واتساب</button>
+  <button class="green" onclick="confirmOrder()">إرسال الطلب</button>
+  <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
+  <a href="https://wa.me/905396956440">
+    <button class="green">تواصل واتساب</button>
+  </a>
 </div>
 
-<div class="section">
-  <h3>📦 سجل طلباتك</h3>
-  <div id="historyList"></div>
+<!-- سجل الطلبات -->
+<div class="card hidden" id="historyBox">
+  <h3>سجل طلباتك</h3>
+  <div id="history"></div>
+</div>
+
 </div>
 
 <script>
-// ===== تسجيل الدخول بالرابط =====
-const params=new URLSearchParams(location.search);
-const username=params.get("user");
-if(!username){
-  document.body.innerHTML="<h2 style='text-align:center'>رابط غير صالح</h2>";
-}
-document.getElementById("welcome").innerText="مرحبًا "+username;
+/* ===== إعدادات ===== */
+const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE";
+const CHAT_ID = "154287241";
 
-// ===== الأسعار =====
-const prices={
- Likee:["1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL","3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"],
- Yahlan:["1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL","10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"],
- "4Fun":["300K ♦ – 950 TL","500K ♦ – 1700 TL","600K ♦ – 1850 TL","1M ♦ – 3200 TL","1.5M ♦ – 4650 TL"],
- Jawaker:["10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL","30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL","100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL","500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"]
+/* مستخدمين */
+const users = {
+  Mostafa:"1111",
+  Adi:"2222"
 };
 
-let selectedApp="",selectedPrice="";
+const prices = {
+  Likee:["1000💎 - 950TL","1500💎 - 1375TL","3000💎 - 2900TL"],
+  Yahlan:["1000💎 - 125TL","5000💎 - 475TL"],
+  "4Fun":["1M💎 - 3200TL"],
+  Jawaker:["100K🪙 - 650TL","200K🪙 - 1250TL"]
+};
 
-// ===== فتح الطلب =====
-function openOrder(app){
- selectedApp=app; selectedPrice="";
- document.getElementById("orderBox").style.display="block";
- document.getElementById("appName").innerText="طلب شحن: "+app;
- let box=document.getElementById("prices"); box.innerHTML="";
- prices[app].forEach(p=>{
-  let b=document.createElement("button");
-  b.className="price-btn";
-  b.innerText=p;
-  b.onclick=()=>{
-    document.querySelectorAll(".price-btn").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active"); selectedPrice=p;
+let currentUser="",selectedPrice="";
+
+/* تسجيل دخول */
+function login(){
+  let u=user.value,p=pass.value;
+  if(users[u]!==p) return alert("بيانات خاطئة");
+  currentUser=u;
+  loginBox.classList.add("hidden");
+  orderBox.classList.remove("hidden");
+  historyBox.classList.remove("hidden");
+  welcome.innerText="مرحباً "+u;
+  loadHistory();
+}
+
+/* تحميل الأسعار */
+function loadPrices(){
+  pricesDiv=prices;
+  pricesBox=pricesDiv[app.value];
+  prices.innerHTML="";
+  selectedPrice="";
+  pricesBox.forEach(p=>{
+    let d=document.createElement("div");
+    d.className="price";
+    d.innerText=p;
+    d.onclick=()=>{
+      document.querySelectorAll(".price").forEach(x=>x.classList.remove("active"));
+      d.classList.add("active");
+      selectedPrice=p;
+    };
+    prices.appendChild(d);
+  });
+}
+
+/* تأكيد الطلب */
+function confirmOrder(){
+  if(!selectedPrice||!userid.value) return alert("أكمل البيانات");
+  if(!confirm("هل أنت متأكد؟")) return;
+  let order={
+    user:currentUser,
+    app:app.value,
+    price:selectedPrice,
+    id:userid.value,
+    time:new Date().toLocaleString()
   };
-  box.appendChild(b);
- });
+  saveOrder(order);
+  sendToTelegram(order,"طلب جديد");
+  alert("تم إرسال الطلب");
 }
 
-// ===== تأكيد =====
-function prepareConfirm(){
- if(!selectedPrice||!userid.value){alert("أكمل البيانات");return;}
- confirmBox.style.display="block";
-}
-function editOrder(){confirmBox.style.display="none";}
-
-// ===== إرسال الطلب =====
-function sendOrder(){
- let id=userid.value;
- let orderId=Math.floor(Math.random()*900000)+100000;
-
- // حفظ الطلب للمستخدم فقط
- let key="orders_"+username;
- let orders=JSON.parse(localStorage.getItem(key)||"[]");
- orders.push({id:orderId,app:selectedApp,pack:selectedPrice});
- localStorage.setItem(key,JSON.stringify(orders));
- loadHistory();
-
- // 🔑 ضع التوكن هنا
- let token="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
- let chatId="154287241";
-
- let text=
- "🆕 طلب جديد\n"+
- "👤 المستخدم: "+username+"\n"+
- "📱 التطبيق: "+selectedApp+"\n"+
- "💰 الباقة: "+selectedPrice+"\n"+
- "🆔 ID: "+id+"\n"+
- "🧾 رقم الطلب: "+orderId;
-
- fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`);
-
- successBox.style.display="block";
- successBox.innerHTML="✅ تم إرسال الطلب<br>رقم الطلب: "+orderId;
- confirmBox.style.display="none";
-}
-
-// ===== الملاحظات =====
-function openNote(){noteBox.style.display="block";}
+/* ملاحظة */
 function sendNote(){
- let note=noteText.value;
- if(!note)return;
-
- let token="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
- let chatId="154287241";
-
- fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent("✉️ ملاحظة من "+username+"\n"+note)}`);
- alert("تم إرسال الملاحظة");
- noteText.value="";
- noteBox.style.display="none";
+  let note=prompt("اكتب الملاحظة");
+  if(note) sendToTelegram({note, user:currentUser},"ملاحظة");
 }
 
-// ===== سجل الطلبات =====
+/* حفظ الطلب */
+function saveOrder(o){
+  let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
+  data.push(o);
+  localStorage.setItem("orders_"+currentUser,JSON.stringify(data));
+  loadHistory();
+}
+
+/* سجل */
 function loadHistory(){
- let key="orders_"+username;
- let orders=JSON.parse(localStorage.getItem(key)||"[]");
- let box=document.getElementById("historyList");
- box.innerHTML="";
- if(!orders.length){box.innerText="لا توجد طلبات";return;}
- orders.forEach(o=>{
-  let d=document.createElement("div");
-  d.className="history-item";
-  d.innerText=`#${o.id} | ${o.app} | ${o.pack}`;
-  box.appendChild(d);
- });
+  let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
+  history.innerHTML="";
+  data.forEach(o=>{
+    history.innerHTML+=`<div>${o.app} | ${o.price} | ${o.time}</div>`;
+  });
 }
-loadHistory();
 
-// ===== واتساب =====
-function openWhatsApp(){
- window.open("https://wa.me/905396956440","_blank");
+/* تلغرام */
+function sendToTelegram(data,title){
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(title+"\n"+JSON.stringify(data,null,2))}`);
+}
+
+/* لغة */
+function setLang(l){
+  alert("تغيير اللغة: "+l+" (واجهة فقط)");
 }
 </script>
 
