@@ -22,8 +22,8 @@ header{
   background:#fff;
   margin:20px;
   padding:15px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,.1);
+  border-radius:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.1);
 }
 .apps{
   display:grid;
@@ -33,19 +33,15 @@ header{
 }
 .app{
   text-align:center;
-  cursor:pointer;
   padding:10px;
-  border-radius:10px;
-  background:#f1f5f9;
+  border-radius:12px;
+  cursor:pointer;
+  border:2px solid transparent;
 }
+.app.active{border-color:#2563eb;background:#eef2ff}
 .app img{
   width:50px;
   height:50px;
-  object-fit:contain;
-}
-.app.active{
-  border:2px solid #2563eb;
-  background:#dbeafe;
 }
 select,input,button{
   width:100%;
@@ -55,16 +51,17 @@ select,input,button{
 }
 button{
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
 }
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
+.gray{background:#64748b;color:#fff}
 .price{
   padding:10px;
   margin-top:8px;
   border:1px solid #ddd;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
 }
 .price.active{
@@ -72,6 +69,30 @@ button{
   color:#fff;
 }
 .hidden{display:none}
+
+/* نافذة تأكيد */
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+.modal{
+  background:#fff;
+  width:90%;
+  max-width:400px;
+  border-radius:18px;
+  padding:20px;
+  text-align:center;
+}
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+}
 </style>
 </head>
 
@@ -95,27 +116,25 @@ button{
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
 
-  <!-- التطبيقات مع الصور -->
   <div class="apps">
     <div class="app" onclick="selectApp('Likee',this)">
-      <img src="likee.jpg"><br>لايكي
+      <img src="likee.jpg"><div>لايكي</div>
     </div>
     <div class="app" onclick="selectApp('Yahlan',this)">
-      <img src="yahlan.jpg"><br>ياهـلان
+      <img src="yahlan.jpg"><div>ياهـلان</div>
     </div>
     <div class="app" onclick="selectApp('4Fun',this)">
-      <img src="4fun.jpg"><br>4Fun
+      <img src="4fun.jpg"><div>4Fun</div>
     </div>
     <div class="app" onclick="selectApp('Jawaker',this)">
-      <img src="jawaker.jpg"><br>جواكر
+      <img src="jawaker.jpg"><div>جواكر</div>
     </div>
   </div>
 
   <div id="prices"></div>
-
   <input id="userid" placeholder="ID الحساب">
 
-  <button class="green" onclick="sendOrder()">إرسال الطلب</button>
+  <button class="green" onclick="openConfirm()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
 
   <a href="https://wa.me/905396956440">
@@ -129,100 +148,115 @@ button{
   <div id="history"></div>
 </div>
 
+<!-- نافذة التأكيد -->
+<div id="confirmModal" class="hidden modal-bg">
+  <div class="modal">
+    <h3>تأكيد الطلب</h3>
+    <p id="confirmText"></p>
+    <div class="modal-actions">
+      <button class="green" onclick="confirmYes()">نعم، إرسال</button>
+      <button class="gray" onclick="confirmNo()">تعديل</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // ← ضع التوكن هنا
+/* ضع التوكن هنا لاحقاً */
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
 const CHAT_ID = "154287241";
 
-const users = {
-  Mostafa:"235100",
-  Adi:"2351"
-};
+/* المستخدمين */
+const users={Mostafa:"235100",Adi:"2351"};
 
-const pricesData = {
-  Likee:[
-    "1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL",
-    "3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"
-  ],
-  Yahlan:[
-    "1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL",
-    "10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"
-  ],
-  "4Fun":[
-    "300K 💎 – 950 TL","500K 💎 – 1700 TL",
-    "600K 💎 – 1850 TL","1M 💎 – 3200 TL","1.5M 💎 – 4650 TL"
-  ],
-  Jawaker:[
-    "10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL",
-    "30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL",
-    "100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL",
-    "500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"
-  ]
+/* الأسعار كاملة */
+const pricesData={
+Likee:[
+"1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL",
+"3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"],
+Yahlan:[
+"1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL",
+"10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"],
+"4Fun":[
+"300K 💎 – 950 TL","500K 💎 – 1700 TL","600K 💎 – 1850 TL",
+"1M 💎 – 3200 TL","1.5M 💎 – 4650 TL"],
+Jawaker:[
+"10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL",
+"30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL",
+"100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL",
+"500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
 
+/* تسجيل دخول */
 function login(){
-  if(users[user.value]!==pass.value) return alert("كلمة السر خاطئة");
-  currentUser=user.value;
-  loginBox.classList.add("hidden");
-  orderBox.classList.remove("hidden");
-  historyBox.classList.remove("hidden");
-  welcome.innerText="مرحباً "+currentUser;
-  loadHistory();
+ if(users[user.value]!==pass.value) return alert("كلمة السر خاطئة");
+ currentUser=user.value;
+ loginBox.classList.add("hidden");
+ orderBox.classList.remove("hidden");
+ historyBox.classList.remove("hidden");
+ welcome.innerText="مرحباً "+currentUser;
+ loadHistory();
 }
 
+/* اختيار التطبيق */
 function selectApp(app,el){
-  selectedApp=app;
-  document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
-  el.classList.add("active");
-  prices.innerHTML="";
-  selectedPrice="";
-  pricesData[app].forEach(p=>{
-    let d=document.createElement("div");
-    d.className="price";
-    d.innerText=p;
-    d.onclick=()=>{
-      document.querySelectorAll(".price").forEach(x=>x.classList.remove("active"));
-      d.classList.add("active");
-      selectedPrice=p;
-    };
-    prices.appendChild(d);
-  });
+ selectedApp=app; selectedPrice="";
+ document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
+ el.classList.add("active");
+ prices.innerHTML="";
+ pricesData[app].forEach(p=>{
+  let d=document.createElement("div");
+  d.className="price";
+  d.innerText=p;
+  d.onclick=()=>{
+   document.querySelectorAll(".price").forEach(x=>x.classList.remove("active"));
+   d.classList.add("active");
+   selectedPrice=p;
+  };
+  prices.appendChild(d);
+ });
 }
 
-function sendOrder(){
-  if(!selectedPrice||!userid.value) return alert("أكمل البيانات");
-  if(!confirm("هل أنت متأكد؟")) return;
-
-  let order={user:currentUser,app:selectedApp,price:selectedPrice,id:userid.value};
-
-  let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
-  arr.push(order);
-  localStorage.setItem("orders_"+currentUser,JSON.stringify(arr));
-  loadHistory();
-
-  if(BOT_TOKEN){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
-  }
-
-  alert("تم إرسال الطلب ✅");
+/* تأكيد */
+function openConfirm(){
+ if(!selectedApp||!selectedPrice||!userid.value)
+  return alert("أكمل البيانات");
+ confirmText.innerHTML=
+ `التطبيق: ${selectedApp}<br>الباقة: ${selectedPrice}<br>ID: ${userid.value}`;
+ confirmModal.classList.remove("hidden");
+}
+function confirmNo(){confirmModal.classList.add("hidden");}
+function confirmYes(){
+ confirmModal.classList.add("hidden");
+ let order={
+  user:currentUser,app:selectedApp,price:selectedPrice,
+  id:userid.value,time:new Date().toLocaleString()
+ };
+ let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
+ arr.push(order);
+ localStorage.setItem("orders_"+currentUser,JSON.stringify(arr));
+ loadHistory();
+ if(BOT_TOKEN){
+ fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
+ }
+ alert("تم إرسال الطلب ✅");
 }
 
+/* ملاحظة */
 function sendNote(){
-  let note=prompt("اكتب الملاحظة");
-  if(note && BOT_TOKEN){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(note)}`);
-  }
+ let n=prompt("اكتب الملاحظة");
+ if(n && BOT_TOKEN)
+ fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`);
 }
 
+/* سجل */
 function loadHistory(){
-  history.innerHTML="";
-  let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
-  data.forEach(o=>{
-    history.innerHTML+=`<div>${o.app} | ${o.price}</div>`;
-  });
+ history.innerHTML="";
+ JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]")
+ .forEach(o=>history.innerHTML+=`<div>${o.app} | ${o.price}</div>`);
 }
 </script>
 
 </body>
-</html>
+  </html>
