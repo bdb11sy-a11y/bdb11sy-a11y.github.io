@@ -249,6 +249,12 @@ async function sendOrder(){
   const fileInput = document.getElementById("attachment");
   const file = fileInput.files[0];
 
+  // 🔴 منع الإرسال بدون إشعار
+  if(!file){
+    alert("⚠️ يرجى إرفاق إشعار التحويل (Dekont أو لقطة شاشة)");
+    return;
+  }
+
   let caption =
     "🆕 طلب جديد\n" +
     "👤 المستخدم: " + currentUser + "\n" +
@@ -256,20 +262,6 @@ async function sendOrder(){
     "💰 الباقة: " + selectedPrice + "\n" +
     "🆔 ID: " + userid.value;
 
-  // ===== بدون ملف =====
-  if(!file){
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: caption
-      })
-    });
-
-    alert("تم إرسال الطلب ✅");
-  }
-  // ===== مع ملف =====
   const formData = new FormData();
   formData.append("chat_id", CHAT_ID);
   formData.append("caption", caption);
@@ -288,7 +280,7 @@ async function sendOrder(){
     });
   }
 
-  alert("تم إرسال الطلب مع الملف ✅");
+  alert("تم إرسال الطلب مع الإشعار ✅");
   }
 /* ===== إرسال ملاحظة (مزبوط 100%) ===== */
 function sendNote(){
