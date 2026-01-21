@@ -25,6 +25,28 @@ header{
   border-radius:12px;
   box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
+.apps{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:15px;
+}
+.app{
+  text-align:center;
+  cursor:pointer;
+  padding:10px;
+  border-radius:10px;
+  background:#f1f5f9;
+}
+.app img{
+  width:50px;
+  height:50px;
+  object-fit:contain;
+}
+.app.active{
+  border:2px solid #2563eb;
+  background:#dbeafe;
+}
 select,input,button{
   width:100%;
   padding:10px;
@@ -73,13 +95,21 @@ button{
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
 
-  <select id="app">
-    <option value="">اختر التطبيق</option>
-    <option value="Likee">Likee</option>
-    <option value="Yahlan">Yahlan</option>
-    <option value="4Fun">4Fun</option>
-    <option value="Jawaker">Jawaker</option>
-  </select>
+  <!-- التطبيقات مع الصور -->
+  <div class="apps">
+    <div class="app" onclick="selectApp('Likee',this)">
+      <img src="likee.jpg"><br>لايكي
+    </div>
+    <div class="app" onclick="selectApp('Yahlan',this)">
+      <img src="yahlan.jpg"><br>ياهـلان
+    </div>
+    <div class="app" onclick="selectApp('4Fun',this)">
+      <img src="4fun.jpg"><br>4Fun
+    </div>
+    <div class="app" onclick="selectApp('Jawaker',this)">
+      <img src="jawaker.jpg"><br>جواكر
+    </div>
+  </div>
 
   <div id="prices"></div>
 
@@ -100,47 +130,39 @@ button{
 </div>
 
 <script>
-/* ضع التوكن لاحقاً */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // ← ضع التوكن هنا
 const CHAT_ID = "154287241";
 
-/* المستخدمين */
 const users = {
   Mostafa:"235100",
   Adi:"2351"
 };
 
-/* الباقات */
 const pricesData = {
   Likee:[
-    "1000 💎 – 950 TL",
-    "1500 💎 – 1375 TL",
-    "2000 💎 – 1850 TL",
-    "3000 💎 – 2900 TL"
+    "1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL",
+    "3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"
   ],
   Yahlan:[
-    "1000 💎 – 125 TL",
-    "2000 💎 – 225 TL",
-    "5000 💎 – 475 TL"
+    "1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL",
+    "10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"
   ],
   "4Fun":[
-    "300K 💎 – 950 TL",
-    "1M 💎 – 3200 TL"
+    "300K 💎 – 950 TL","500K 💎 – 1700 TL",
+    "600K 💎 – 1850 TL","1M 💎 – 3200 TL","1.5M 💎 – 4650 TL"
   ],
   Jawaker:[
-    "100K 🪙 – 650 TL",
-    "200K 🪙 – 1250 TL"
+    "10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL",
+    "30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL",
+    "100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL",
+    "500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"
   ]
 };
 
-let currentUser="",selectedPrice="";
+let currentUser="",selectedApp="",selectedPrice="";
 
-/* تسجيل الدخول */
 function login(){
-  if(users[user.value]!==pass.value){
-    alert("كلمة السر خاطئة");
-    return;
-  }
+  if(users[user.value]!==pass.value) return alert("كلمة السر خاطئة");
   currentUser=user.value;
   loginBox.classList.add("hidden");
   orderBox.classList.remove("hidden");
@@ -149,11 +171,13 @@ function login(){
   loadHistory();
 }
 
-/* تحميل الباقات – هذا كان الخطأ */
-app.onchange=function(){
+function selectApp(app,el){
+  selectedApp=app;
+  document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
+  el.classList.add("active");
   prices.innerHTML="";
   selectedPrice="";
-  pricesData[app.value]?.forEach(p=>{
+  pricesData[app].forEach(p=>{
     let d=document.createElement("div");
     d.className="price";
     d.innerText=p;
@@ -166,21 +190,11 @@ app.onchange=function(){
   });
 }
 
-/* إرسال الطلب */
 function sendOrder(){
-  if(!selectedPrice||!userid.value){
-    alert("أكمل البيانات");
-    return;
-  }
+  if(!selectedPrice||!userid.value) return alert("أكمل البيانات");
   if(!confirm("هل أنت متأكد؟")) return;
 
-  let order={
-    user:currentUser,
-    app:app.value,
-    price:selectedPrice,
-    id:userid.value,
-    time:new Date().toLocaleString()
-  };
+  let order={user:currentUser,app:selectedApp,price:selectedPrice,id:userid.value};
 
   let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
   arr.push(order);
@@ -194,7 +208,6 @@ function sendOrder(){
   alert("تم إرسال الطلب ✅");
 }
 
-/* ملاحظة */
 function sendNote(){
   let note=prompt("اكتب الملاحظة");
   if(note && BOT_TOKEN){
@@ -202,7 +215,6 @@ function sendNote(){
   }
 }
 
-/* سجل */
 function loadHistory(){
   history.innerHTML="";
   let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
