@@ -6,14 +6,15 @@
 
 <style>
 :root{
-  --main:#0f172a;
-  --card:#ffffff;
+  --main:#2563eb;
+  --dark:#0f172a;
   --bg:#f1f5f9;
+  --card:#ffffff;
 }
 body{
   margin:0;
   font-family:Arial;
-  background:var(--bg);
+  background:linear-gradient(180deg,#e0f2fe,#f8fafc);
   direction:rtl;
 }
 header{
@@ -23,65 +24,51 @@ header{
   text-align:center;
   font-size:22px;
 }
-.container{padding:20px}
+.container{padding:20px;max-width:700px;margin:auto}
 .card{
   background:var(--card);
-  border-radius:12px;
+  border-radius:14px;
   padding:15px;
   margin-bottom:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,.08);
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
 input,button,select{
   width:100%;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
   font-size:16px;
+  border-radius:8px;
+  border:1px solid #ddd;
 }
 button{
   background:var(--main);
   color:#fff;
   border:none;
-  border-radius:8px;
   cursor:pointer;
 }
 button.green{background:#22c55e}
 button.orange{background:#f59e0b}
 button.gray{background:#64748b}
 .price{
-  padding:10px;
+  padding:12px;
   border:1px solid #ddd;
-  border-radius:8px;
+  border-radius:10px;
   margin-top:8px;
   cursor:pointer;
+  background:#f8fafc;
 }
 .price.active{
-  background:#2563eb;
+  background:linear-gradient(135deg,#2563eb,#1e40af);
   color:#fff;
 }
 .hidden{display:none}
-.lang{
-  position:absolute;
-  left:10px;
-  top:10px;
-}
-.lang button{
-  width:auto;
-  padding:5px 10px;
-  margin:2px;
-}
+small{color:#64748b}
 </style>
 </head>
 
 <body>
 
-<header>
-  العبادي – شحن التطبيقات
-  <div class="lang">
-    <button onclick="setLang('ar')">AR</button>
-    <button onclick="setLang('en')">EN</button>
-    <button onclick="setLang('tr')">TR</button>
-  </div>
-</header>
+<header>العبادي – شحن التطبيقات</header>
 
 <div class="container">
 
@@ -115,35 +102,51 @@ button.gray{background:#64748b}
 
   <button class="green" onclick="confirmOrder()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
-  <a href="https://wa.me/905396956440">
-    <button class="green">تواصل واتساب</button>
+
+  <a href="https://wa.me/905396956440" target="_blank">
+    <button class="green">📞 تواصل واتساب</button>
   </a>
 </div>
 
 <!-- سجل الطلبات -->
 <div class="card hidden" id="historyBox">
-  <h3>سجل طلباتك</h3>
+  <h3>📦 سجل طلباتك</h3>
   <div id="history"></div>
 </div>
 
 </div>
 
 <script>
-/* ===== إعدادات ===== */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+/* ================== إعدادات ================== */
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // 👈 ضع التوكن هنا
 const CHAT_ID = "154287241";
 
-/* مستخدمين */
+/* المستخدمين */
 const users = {
-  Mostafa:"1111",
-  Adi:"2222"
+  Mostafa:"235100",
+  Adi:"235100"
 };
 
+/* الأسعار */
 const prices = {
-  Likee:["1000💎 - 950TL","1500💎 - 1375TL","3000💎 - 2900TL"],
-  Yahlan:["1000💎 - 125TL","5000💎 - 475TL"],
-  "4Fun":["1M💎 - 3200TL"],
-  Jawaker:["100K🪙 - 650TL","200K🪙 - 1250TL"]
+  Likee:[
+    "1000 💎 - 950 TL","1500 💎 - 1375 TL","2000 💎 - 1850 TL",
+    "3000 💎 - 2900 TL","4000 💎 - 3750 TL","5000 💎 - 4700 TL"
+  ],
+  Yahlan:[
+    "1000 💎 - 125 TL","2000 💎 - 225 TL","5000 💎 - 475 TL",
+    "10000 💎 - 950 TL","20000 💎 - 1850 TL","50000 💎 - 4850 TL"
+  ],
+  "4Fun":[
+    "300K 💠 - 950 TL","500K 💠 - 1700 TL",
+    "600K 💠 - 1850 TL","1M 💠 - 3200 TL","1.5M 💠 - 4650 TL"
+  ],
+  Jawaker:[
+    "10K 🪙 - 100 TL","20K 🪙 - 175 TL","25K 🪙 - 200 TL",
+    "30K 🪙 - 250 TL","50K 🪙 - 350 TL","70K 🪙 - 500 TL",
+    "100K 🪙 - 650 TL","200K 🪙 - 1250 TL",
+    "300K 🪙 - 1850 TL","500K 🪙 - 3000 TL","1M 🪙 - 5300 TL"
+  ]
 };
 
 let currentUser="",selectedPrice="";
@@ -151,7 +154,7 @@ let currentUser="",selectedPrice="";
 /* تسجيل دخول */
 function login(){
   let u=user.value,p=pass.value;
-  if(users[u]!==p) return alert("بيانات خاطئة");
+  if(users[u]!==p) return alert("كلمة السر غير صحيحة");
   currentUser=u;
   loginBox.classList.add("hidden");
   orderBox.classList.remove("hidden");
@@ -162,11 +165,10 @@ function login(){
 
 /* تحميل الأسعار */
 function loadPrices(){
-  pricesDiv=prices;
-  pricesBox=pricesDiv[app.value];
-  prices.innerHTML="";
+  pricesDiv.innerHTML="";
   selectedPrice="";
-  pricesBox.forEach(p=>{
+  if(!prices[app.value]) return;
+  prices[app.value].forEach(p=>{
     let d=document.createElement("div");
     d.className="price";
     d.innerText=p;
@@ -175,37 +177,37 @@ function loadPrices(){
       d.classList.add("active");
       selectedPrice=p;
     };
-    prices.appendChild(d);
+    pricesDiv.appendChild(d);
   });
 }
 
 /* تأكيد الطلب */
 function confirmOrder(){
   if(!selectedPrice||!userid.value) return alert("أكمل البيانات");
-  if(!confirm("هل أنت متأكد؟")) return;
+  if(!confirm("هل أنت متأكد من الطلب؟")) return;
   let order={
-    user:currentUser,
     app:app.value,
     price:selectedPrice,
     id:userid.value,
     time:new Date().toLocaleString()
   };
   saveOrder(order);
-  sendToTelegram(order,"طلب جديد");
-  alert("تم إرسال الطلب");
+  sendTelegram("🆕 طلب جديد",order);
+  alert("تم إرسال الطلب ✅");
 }
 
 /* ملاحظة */
 function sendNote(){
   let note=prompt("اكتب الملاحظة");
-  if(note) sendToTelegram({note, user:currentUser},"ملاحظة");
+  if(note) sendTelegram("✏️ ملاحظة",{user:currentUser,note});
 }
 
 /* حفظ الطلب */
 function saveOrder(o){
-  let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
+  let key="orders_"+currentUser;
+  let data=JSON.parse(localStorage.getItem(key)||"[]");
   data.push(o);
-  localStorage.setItem("orders_"+currentUser,JSON.stringify(data));
+  localStorage.setItem(key,JSON.stringify(data));
   loadHistory();
 }
 
@@ -214,18 +216,13 @@ function loadHistory(){
   let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
   history.innerHTML="";
   data.forEach(o=>{
-    history.innerHTML+=`<div>${o.app} | ${o.price} | ${o.time}</div>`;
+    history.innerHTML+=`<div class="price">${o.app} | ${o.price}<br><small>${o.time}</small></div>`;
   });
 }
 
 /* تلغرام */
-function sendToTelegram(data,title){
+function sendTelegram(title,data){
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(title+"\n"+JSON.stringify(data,null,2))}`);
-}
-
-/* لغة */
-function setLang(l){
-  alert("تغيير اللغة: "+l+" (واجهة فقط)");
 }
 </script>
 
