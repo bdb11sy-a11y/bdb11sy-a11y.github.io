@@ -242,34 +242,25 @@ function selectApp(app,el){
 /* إرسال الطلب */
 function sendOrder(){
   if(!selectedApp || !selectedPrice || !userid.value){
-    alert("أكمل البيانات"); 
+    alert("أكمل البيانات");
     return;
   }
 
-  const fileInput = document.getElementById("attachment");
-  const file = fileInput.files[0];
-
-  let caption =
+  let text =
     "🆕 طلب جديد\n" +
     "👤 المستخدم: " + currentUser + "\n" +
     "📱 التطبيق: " + selectedApp + "\n" +
     "💰 الباقة: " + selectedPrice + "\n" +
     "🆔 ID: " + userid.value;
 
-  // بدون ملف
-  if(!file){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        text: caption
-      })
-    });
-    alert("تم إرسال الطلب ✅");
-    return;
-  }
+  fetch(
+    "https://api.telegram.org/bot" + BOT_TOKEN +
+    "/sendMessage?chat_id=" + CHAT_ID +
+    "&text=" + encodeURIComponent(text)
+  );
 
+  alert("تم إرسال الطلب ✅");
+                         }
   // مع ملف
   const formData = new FormData();
   formData.append("chat_id", CHAT_ID);
