@@ -5,96 +5,57 @@
 <title>Alabbadi Services</title>
 
 <style>
-:root{
-  --bg:#f1f5f9;
-  --card:#ffffff;
-  --main:#0f172a;
-}
 body{
   margin:0;
-  font-family:Arial, sans-serif;
-  background:linear-gradient(180deg,#e0f2fe,#f8fafc);
+  font-family:Arial;
+  background:linear-gradient(#e0f2fe,#f8fafc);
   direction:rtl;
 }
 header{
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  background:#0f172a;
   color:#fff;
   padding:15px;
   text-align:center;
-  font-size:22px;
+  font-size:20px;
 }
-.container{padding:20px;max-width:800px;margin:auto}
 .card{
-  background:var(--card);
-  border-radius:14px;
+  background:#fff;
+  margin:20px;
   padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
-.hidden{display:none}
-input,select,button{
+select,input,button{
   width:100%;
-  padding:12px;
+  padding:10px;
   margin-top:10px;
   font-size:16px;
-  border-radius:10px;
-  border:1px solid #ddd;
 }
 button{
   border:none;
+  border-radius:8px;
   cursor:pointer;
 }
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
-.dark{background:#0f172a;color:#fff}
-
-.apps{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:15px;
-}
-.app{
-  background:#fff;
-  border-radius:14px;
-  padding:10px;
-  text-align:center;
-  cursor:pointer;
-  box-shadow:0 4px 10px rgba(0,0,0,.1);
-}
-.app img{
-  width:60px;
-  height:60px;
-  object-fit:contain;
-  margin-bottom:5px;
-}
 .price{
-  padding:12px;
-  border-radius:10px;
+  padding:10px;
   margin-top:8px;
-  cursor:pointer;
   border:1px solid #ddd;
-  background:#f8fafc;
+  border-radius:8px;
+  cursor:pointer;
 }
 .price.active{
-  background:linear-gradient(90deg,#2563eb,#22c55e);
+  background:#2563eb;
   color:#fff;
-  font-weight:bold;
 }
-.history-item{
-  background:#f1f5f9;
-  padding:10px;
-  border-radius:10px;
-  margin-top:8px;
-  font-size:14px;
-}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
 <header>العبادي – شحن التطبيقات</header>
-
-<div class="container">
 
 <!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
@@ -105,51 +66,42 @@ button{
     <option value="Adi">Adi</option>
   </select>
   <input type="password" id="pass" placeholder="كلمة السر">
-  <button class="dark" onclick="login()">دخول</button>
-</div>
-
-<!-- التطبيقات -->
-<div class="card hidden" id="appsBox">
-  <h3 id="welcome"></h3>
-  <div class="apps">
-    <div class="app" onclick="selectApp('Likee')">
-      <img src="likee.jpg"><div>لايكي</div>
-    </div>
-    <div class="app" onclick="selectApp('Yahlan')">
-      <img src="yahlan.jpg"><div>ياهـلان</div>
-    </div>
-    <div class="app" onclick="selectApp('4Fun')">
-      <img src="4fun.jpg"><div>4Fun</div>
-    </div>
-    <div class="app" onclick="selectApp('Jawaker')">
-      <img src="jawaker.jpg"><div>جواكر</div>
-    </div>
-  </div>
+  <button class="green" onclick="login()">دخول</button>
 </div>
 
 <!-- الطلب -->
 <div class="card hidden" id="orderBox">
-  <h3 id="appTitle"></h3>
+  <h3 id="welcome"></h3>
+
+  <select id="app">
+    <option value="">اختر التطبيق</option>
+    <option value="Likee">Likee</option>
+    <option value="Yahlan">Yahlan</option>
+    <option value="4Fun">4Fun</option>
+    <option value="Jawaker">Jawaker</option>
+  </select>
+
   <div id="prices"></div>
-  <input id="userid" placeholder="اكتب ID الحساب">
-  <button class="green" onclick="confirmOrder()">إرسال الطلب</button>
+
+  <input id="userid" placeholder="ID الحساب">
+
+  <button class="green" onclick="sendOrder()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
+
   <a href="https://wa.me/905396956440">
-    <button class="green">📞 تواصل واتساب</button>
+    <button class="green">تواصل واتساب</button>
   </a>
 </div>
 
-<!-- سجل الطلبات -->
+<!-- سجل -->
 <div class="card hidden" id="historyBox">
-  <h3>📦 سجل طلباتك</h3>
+  <h3>سجل طلباتك</h3>
   <div id="history"></div>
 </div>
 
-</div>
-
 <script>
-/* 🔴 ضع التوكن هنا */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // ← أضف التوكن
+/* ضع التوكن لاحقاً */
+const BOT_TOKEN = "";
 const CHAT_ID = "154287241";
 
 /* المستخدمين */
@@ -158,51 +110,50 @@ const users = {
   Adi:"235100"
 };
 
+/* الباقات */
 const pricesData = {
   Likee:[
-    "1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL",
-    "3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"
+    "1000 💎 – 950 TL",
+    "1500 💎 – 1375 TL",
+    "2000 💎 – 1850 TL",
+    "3000 💎 – 2900 TL"
   ],
   Yahlan:[
-    "1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL",
-    "10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"
+    "1000 💎 – 125 TL",
+    "2000 💎 – 225 TL",
+    "5000 💎 – 475 TL"
   ],
   "4Fun":[
-    "300K 💠 – 950 TL","500K 💠 – 1700 TL","600K 💠 – 1850 TL",
-    "1M 💠 – 3200 TL","1.5M 💠 – 4650 TL"
+    "300K 💎 – 950 TL",
+    "1M 💎 – 3200 TL"
   ],
   Jawaker:[
-    "10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL",
-    "30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL",
-    "100K 🪙 – 650 TL","200K 🪙 – 1250 TL",
-    "300K 🪙 – 1850 TL","500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"
+    "100K 🪙 – 650 TL",
+    "200K 🪙 – 1250 TL"
   ]
 };
 
-let currentUser="",currentApp="",selectedPrice="";
+let currentUser="",selectedPrice="";
 
 /* تسجيل الدخول */
 function login(){
   if(users[user.value]!==pass.value){
-    alert("كلمة السر غير صحيحة");
+    alert("كلمة السر خاطئة");
     return;
   }
   currentUser=user.value;
   loginBox.classList.add("hidden");
-  appsBox.classList.remove("hidden");
+  orderBox.classList.remove("hidden");
   historyBox.classList.remove("hidden");
   welcome.innerText="مرحباً "+currentUser;
   loadHistory();
 }
 
-/* اختيار التطبيق */
-function selectApp(app){
-  currentApp=app;
-  selectedPrice="";
-  orderBox.classList.remove("hidden");
-  appTitle.innerText="طلب شحن: "+app;
+/* تحميل الباقات – هذا كان الخطأ */
+app.onchange=function(){
   prices.innerHTML="";
-  pricesData[app].forEach(p=>{
+  selectedPrice="";
+  pricesData[app.value]?.forEach(p=>{
     let d=document.createElement("div");
     d.className="price";
     d.innerText=p;
@@ -215,49 +166,49 @@ function selectApp(app){
   });
 }
 
-/* تأكيد الطلب */
-function confirmOrder(){
-  if(!selectedPrice||!userid.value) return alert("أكمل البيانات");
-  if(!confirm("هل أنت متأكد من الطلب؟")) return;
+/* إرسال الطلب */
+function sendOrder(){
+  if(!selectedPrice||!userid.value){
+    alert("أكمل البيانات");
+    return;
+  }
+  if(!confirm("هل أنت متأكد؟")) return;
 
   let order={
-    app:currentApp,
+    user:currentUser,
+    app:app.value,
     price:selectedPrice,
     id:userid.value,
     time:new Date().toLocaleString()
   };
-  saveOrder(order);
-  sendTelegram("🆕 طلب جديد",order);
+
+  let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
+  arr.push(order);
+  localStorage.setItem("orders_"+currentUser,JSON.stringify(arr));
+  loadHistory();
+
+  if(BOT_TOKEN){
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
+  }
+
   alert("تم إرسال الطلب ✅");
 }
 
 /* ملاحظة */
 function sendNote(){
-  let n=prompt("اكتب الملاحظة");
-  if(n) sendTelegram("✏️ ملاحظة",{user:currentUser,note:n});
-}
-
-/* حفظ الطلب */
-function saveOrder(o){
-  let d=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
-  d.push(o);
-  localStorage.setItem("orders_"+currentUser,JSON.stringify(d));
-  loadHistory();
+  let note=prompt("اكتب الملاحظة");
+  if(note && BOT_TOKEN){
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(note)}`);
+  }
 }
 
 /* سجل */
 function loadHistory(){
   history.innerHTML="";
-  let d=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
-  d.forEach(o=>{
-    history.innerHTML+=`<div class="history-item">${o.app} | ${o.price} | ${o.time}</div>`;
+  let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
+  data.forEach(o=>{
+    history.innerHTML+=`<div>${o.app} | ${o.price}</div>`;
   });
-}
-
-/* تلغرام */
-function sendTelegram(title,data){
-  if(!BOT_TOKEN) return;
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(title+"\n"+JSON.stringify(data,null,2))}`);
 }
 </script>
 
