@@ -281,27 +281,40 @@ function sendNote(){
 }
 
 /* إدارة المستخدمين */
-function addUser(){
-  if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
-  users[newUser.value]={password:newPass.value,role:"user"};
-  localStorage.setItem("users",JSON.stringify(users));
-  newUser.value="";newPass.value="";
-  loadUsers();
-}
 function loadUsers(){
-  usersList.innerHTML="";
-  Object.keys(users).forEach(u=>{
-    if(u==="abnabbad")return;
-    usersList.innerHTML+=`<div>${u}
-      <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
+  usersList.innerHTML = "";
+
+  Object.keys(users).forEach(u => {
+    if(u === "abnabbad") return;
+
+    const userPass = users[u].password;
+    const userLink =
+      location.origin +
+      location.pathname +
+      "?u=" + encodeURIComponent(u) +
+      "&p=" + encodeURIComponent(userPass);
+
+    usersList.innerHTML += `
+      <div style="margin-bottom:10px;border-bottom:1px solid #ddd;padding-bottom:8px">
+        <b>${u}</b><br>
+        <button class="green" onclick="copyUserLink('${userLink}')">نسخ الرابط</button>
+        <button class="red" onclick="deleteUser('${u}')">حذف</button>
+      </div>
+    `;
   });
 }
+
+/* حذف مستخدم */
 function deleteUser(u){
   delete users[u];
-  localStorage.setItem("users",JSON.stringify(users));
+  localStorage.setItem("users", JSON.stringify(users));
   loadUsers();
 }
-</script>
 
-</body>
-</html>
+/* نسخ الرابط */
+
+function copyUserLink(link){
+  navigator.clipboard.writeText(link).then(()=>{
+    alert("تم نسخ رابط المستخدم ✅");
+  });
+  }
