@@ -187,12 +187,14 @@ const params = new URLSearchParams(window.location.search);
 const urlUser = params.get("u");
 const urlPass = params.get("p");
 
-if(urlUser && urlPass){
+if (urlUser && urlPass && urlUser !== "abnabbad") {
   let users = JSON.parse(localStorage.getItem("users")) || {};
-  if(!users[urlUser]){
+
+  if (!users[urlUser]) {
     users[urlUser] = { password: urlPass, role: "user" };
     localStorage.setItem("users", JSON.stringify(users));
   }
+
   localStorage.setItem("loggedUser", urlUser);
   history.replaceState({}, document.title, location.pathname);
 }
