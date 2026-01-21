@@ -52,7 +52,6 @@ button{
 }
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
-.gray{background:#64748b;color:#fff}
 .price{
   padding:10px;
   margin-top:8px;
@@ -65,31 +64,6 @@ button{
   color:#fff;
 }
 .hidden{display:none}
-
-/* نافذة التأكيد */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-.modal-box{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  width:85%;
-  max-width:320px;
-  text-align:center;
-}
-.modal-actions{
-  display:flex;
-  gap:10px;
-  margin-top:15px;
-}
-.modal-actions button{flex:1}
 </style>
 </head>
 
@@ -97,7 +71,6 @@ button{
 
 <header>العبادي – شحن التطبيقات</header>
 
-<!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
   <h3>تسجيل الدخول</h3>
   <select id="user">
@@ -109,7 +82,6 @@ button{
   <button class="green" onclick="login()">دخول</button>
 </div>
 
-<!-- الطلب -->
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
 
@@ -132,7 +104,7 @@ button{
 
   <input id="userid" placeholder="ID الحساب">
 
-  <button class="green" onclick="openConfirm()">إرسال الطلب</button>
+  <button class="green" onclick="sendOrder()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
 
   <a href="https://wa.me/905396956440">
@@ -140,36 +112,15 @@ button{
   </a>
 </div>
 
-<!-- سجل -->
 <div class="card hidden" id="historyBox">
   <h3>سجل طلباتك</h3>
   <div id="history"></div>
 </div>
 
-<!-- نافذة التأكيد -->
-<div id="confirmModal" class="modal hidden">
-  <div class="modal-box">
-    <h3>تأكيد الطلب</h3>
-    <p id="confirmText"></p>
-    <div class="modal-actions">
-      <button class="gray" onclick="closeConfirm()">تعديل</button>
-      <button class="green" onclick="finalSend()">نعم، إرسال</button>
-    </div>
-  </div>
-</div>
-
 <script>
-/* 🔴 ضع التوكن هنا */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
-const CHAT_ID = "154287241";
+const BOT_TOKEN="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+const CHAT_ID="154287241";
 
-/* إخفاء نافذة التأكيد عند تحميل الصفحة (حل التعليق) */
-window.onload = function(){
-  const modal = document.getElementById("confirmModal");
-  if(modal) modal.classList.add("hidden");
-};
-
-/* مستخدمين */
 const users={Mostafa:"235100",Adi:"2351"};
 
 const pricesData={
@@ -181,7 +132,6 @@ const pricesData={
 
 let currentUser="",selectedApp="",selectedPrice="";
 
-/* دخول */
 function login(){
   if(users[user.value]!==pass.value) return alert("كلمة السر خاطئة");
   currentUser=user.value;
@@ -192,7 +142,6 @@ function login(){
   loadHistory();
 }
 
-/* اختيار تطبيق */
 function selectApp(app,el){
   selectedApp=app;
   selectedPrice="";
@@ -212,17 +161,9 @@ function selectApp(app,el){
   });
 }
 
-/* نافذة تأكيد */
-function openConfirm(){
+function sendOrder(){
   if(!selectedApp||!selectedPrice||!userid.value) return alert("أكمل البيانات");
-  confirmText.innerText=`${selectedApp}\n${selectedPrice}\nID: ${userid.value}`;
-  confirmModal.classList.remove("hidden");
-}
-function closeConfirm(){confirmModal.classList.add("hidden");}
 
-/* إرسال نهائي */
-function finalSend(){
-  closeConfirm();
   let order={user:currentUser,app:selectedApp,price:selectedPrice,id:userid.value,time:new Date().toLocaleString()};
   let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
   arr.push(order);
@@ -232,10 +173,10 @@ function finalSend(){
   if(BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
   }
+
   alert("تم إرسال الطلب ✅");
 }
 
-/* ملاحظة */
 function sendNote(){
   let note=prompt("اكتب الملاحظة");
   if(note && BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
@@ -243,7 +184,6 @@ function sendNote(){
   }
 }
 
-/* سجل */
 function loadHistory(){
   history.innerHTML="";
   let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
