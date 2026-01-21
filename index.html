@@ -14,12 +14,12 @@ body{
 header{
   background:#0f172a;
   color:#fff;
-  padding:10px 15px;
+  padding:12px 15px;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-.user-name{font-size:14px}
+header .user{font-size:14px}
 .logout{
   background:#dc2626;
   color:#fff;
@@ -79,6 +79,7 @@ button{
   color:#fff;
 }
 
+/* سعر الصرف */
 #rates{
   position:fixed;
   bottom:0;
@@ -96,7 +97,7 @@ button{
 <body>
 
 <header>
-  <div class="user-name" id="headerUser"></div>
+  <div class="user" id="headerUser"></div>
   <div>العبادي – شحن التطبيقات</div>
   <button class="logout hidden" id="logoutBtn" onclick="logout()">تسجيل خروج</button>
 </header>
@@ -139,12 +140,13 @@ button{
   </a>
 </div>
 
-<!-- لوحة إضافة المستخدمين (للأدمن فقط) -->
+<!-- لوحة الأدمن -->
 <div class="card hidden" id="adminBox">
-  <h3>إضافة مستخدم</h3>
+  <h3>إدارة المستخدمين</h3>
   <input id="newUser" placeholder="اسم المستخدم">
   <input id="newPass" placeholder="كلمة السر">
   <button class="green" onclick="addUser()">إضافة مستخدم</button>
+  <div id="usersList"></div>
 </div>
 
 <div id="rates">
@@ -153,31 +155,29 @@ button{
 
 <script>
 /* ===== ضع توكن تلغرام هنا ===== */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
-const CHAT_ID = "154287241";
+const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE";
+const CHAT_ID  = "154287241";
 
 /* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
 if(!users){
-  users = {
-    abnabbad:{password:"199511",role:"admin"}
-  };
+  users = { abid:{password:"235100",role:"admin"} };
   localStorage.setItem("users",JSON.stringify(users));
 }
 
-let currentUser="",selectedApp="",selectedPrice="";
-
-/* الأسعار */
-const pricesData={
+/* ===== الأسعار ===== */
+const pricesData = {
   likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL","3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"],
   yahlan:["1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL","10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"],
   "4fun":["300K💎 – 950TL","500K💎 – 1700TL","600K💎 – 1850TL","1M💎 – 3200TL","1.5M💎 – 4650TL"],
   jawaker:["10K🪙 – 100TL","20K🪙 – 175TL","25K🪙 – 200TL","30K🪙 – 250TL","50K🪙 – 350TL","70K🪙 – 500TL","100K🪙 – 650TL","200K🪙 – 1250TL","300K🪙 – 1850TL","500K🪙 – 3000TL","1M🪙 – 5300TL"]
 };
 
+let currentUser="",selectedApp="",selectedPrice="";
+
 /* تسجيل الدخول */
 function login(){
-  if(!users[username.value]||users[username.value].password!==password.value){
+  if(!users[username.value] || users[username.value].password!==password.value){
     alert("بيانات خاطئة");return;
   }
   localStorage.setItem("loggedUser",username.value);
@@ -194,7 +194,10 @@ window.onload=()=>{
     logoutBtn.classList.remove("hidden");
     headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
-    if(users[u].role==="admin") adminBox.classList.remove("hidden");
+    if(users[u].role==="admin"){
+      adminBox.classList.remove("hidden");
+      loadUsers();
+    }
   }
 };
 
@@ -204,7 +207,7 @@ function logout(){
   location.reload();
 }
 
-/* اختيار تطبيق */
+/* اختيار التطبيق */
 function selectApp(app,el){
   selectedApp=app;selectedPrice="";
   document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
@@ -223,13 +226,13 @@ function selectApp(app,el){
   });
 }
 
-/* إرسال الطلب */
+/* إرسال الطلب مباشر */
 function sendOrder(){
   if(!selectedApp||!selectedPrice||!userid.value){
     alert("أكمل البيانات");return;
   }
 
-  let text=
+  let text =
     "🆕 طلب جديد\n"+
     "👤 المستخدم: "+currentUser+"\n"+
     "📱 التطبيق: "+selectedApp+"\n"+
@@ -246,20 +249,33 @@ function sendOrder(){
 /* ملاحظة */
 function sendNote(){
   let n=prompt("اكتب الملاحظة");
-  if(n && BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+  if(n && BOT_TOKEN!=="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"){
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent("ملاحظة:\n"+n)}`);
   }
 }
 
-/* إضافة مستخدم */
+/* إدارة المستخدمين */
 function addUser(){
   if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
   users[newUser.value]={password:newPass.value,role:"user"};
   localStorage.setItem("users",JSON.stringify(users));
   newUser.value="";newPass.value="";
-  alert("تمت إضافة المستخدم");
+  loadUsers();
+}
+function loadUsers(){
+  usersList.innerHTML="";
+  Object.keys(users).forEach(u=>{
+    if(u==="abid")return;
+    usersList.innerHTML+=`<div>${u}
+      <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
+  });
+}
+function deleteUser(u){
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
+  loadUsers();
 }
 </script>
 
 </body>
-  </html>
+      </html>
