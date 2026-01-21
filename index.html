@@ -14,20 +14,22 @@ body{
 header{
   background:#0f172a;
   color:#fff;
-  padding:15px;
-  text-align:center;
-  font-size:20px;
-  position:relative;
+  padding:12px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-.logout{
-  position:absolute;
-  left:15px;
-  top:15px;
+header .right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+#logoutBtn{
   background:#dc2626;
   color:#fff;
   border:none;
-  border-radius:8px;
   padding:6px 12px;
+  border-radius:6px;
   cursor:pointer;
   display:none;
 }
@@ -38,20 +40,7 @@ header{
   border-radius:12px;
   box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
-.apps{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-.app{
-  text-align:center;
-  padding:10px;
-  border-radius:10px;
-  cursor:pointer;
-  border:2px solid transparent;
-}
-.app.active{border-color:#2563eb}
-.app img{width:50px;height:50px}
+.hidden{display:none}
 input,button{
   width:100%;
   padding:10px;
@@ -65,6 +54,21 @@ button{
 }
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
+.gray{background:#64748b;color:#fff}
+.apps{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.app{
+  text-align:center;
+  padding:10px;
+  border-radius:10px;
+  border:2px solid transparent;
+  cursor:pointer;
+}
+.app.active{border-color:#2563eb}
+.app img{width:50px;height:50px}
 .price{
   padding:10px;
   margin-top:8px;
@@ -76,54 +80,81 @@ button{
   background:#2563eb;
   color:#fff;
 }
-.hidden{display:none}
+.lang{
+  display:flex;
+  gap:5px;
+}
+.lang button{
+  padding:4px 8px;
+  font-size:12px;
+}
+#ratesBox{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0f172a;
+  color:#fff;
+  text-align:center;
+  padding:6px;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  العبادي – شحن التطبيقات
-  <button class="logout" id="logoutBtn" onclick="logout()">تسجيل خروج</button>
+  <div>العبادي – شحن التطبيقات</div>
+  <div class="right">
+    <span id="userName"></span>
+    <button id="logoutBtn" onclick="logout()">تسجيل خروج</button>
+  </div>
 </header>
 
 <!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
-  <h3>تسجيل الدخول</h3>
-  <input type="text" id="username" placeholder="اسم المستخدم">
+  <div class="lang">
+    <button onclick="setLang('ar')">AR</button>
+    <button onclick="setLang('en')">EN</button>
+    <button onclick="setLang('tr')">TR</button>
+  </div>
+  <h3 id="loginTitle">تسجيل الدخول</h3>
+  <input id="username" placeholder="اسم المستخدم">
   <input type="password" id="password" placeholder="كلمة السر">
   <button class="green" onclick="login()">دخول</button>
 </div>
 
 <!-- الطلب -->
 <div class="card hidden" id="orderBox">
-  <h3 id="welcome"></h3>
-
   <div class="apps">
     <div class="app" onclick="selectApp('Likee',this)">
-      <img src="likee.jpg"><div>Likee</div>
+      <img src="likee.png"><div>Likee</div>
     </div>
     <div class="app" onclick="selectApp('Yahlan',this)">
-      <img src="yahlan.jpg"><div>Yahlan</div>
+      <img src="yahlan.png"><div>Yahlan</div>
     </div>
     <div class="app" onclick="selectApp('4Fun',this)">
-      <img src="4fun.jpg"><div>4Fun</div>
+      <img src="4fun.png"><div>4Fun</div>
     </div>
     <div class="app" onclick="selectApp('Jawaker',this)">
-      <img src="jawaker.jpg"><div>Jawaker</div>
+      <img src="jawaker.png"><div>Jawaker</div>
     </div>
   </div>
 
   <div id="prices"></div>
-
   <input id="userid" placeholder="ID الحساب">
-
   <button class="green" onclick="sendOrder()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
+</div>
 
-  <a href="https://wa.me/905396956440">
-    <button class="green">تواصل واتساب</button>
-  </a>
+<!-- لوحة الأدمن -->
+<div class="card hidden" id="adminBox">
+  <h3>لوحة إدارة المستخدمين</h3>
+  <input id="newUser" placeholder="اسم المستخدم">
+  <input id="newPass" placeholder="كلمة السر">
+  <button class="green" onclick="addUser()">➕ إضافة مستخدم</button>
+  <div id="usersList"></div>
 </div>
 
 <!-- سجل -->
@@ -132,16 +163,25 @@ button{
   <div id="history"></div>
 </div>
 
+<div id="ratesBox">
+  💱 USD: 32.50 TL | 💶 EUR: 35.20 TL
+</div>
+
 <script>
-/* تلغرام (اختياري) */
+/* 🔴 ضع التوكن هنا إذا بدك */
 const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
 const CHAT_ID = "154287241";
 
-/* المستخدمين */
-const users = {
-  mostafa:"235100",
-  adi:"2351"
-};
+/* المستخدمين (يُخزَّنون محليًا) */
+if(!localStorage.getItem("users")){
+  localStorage.setItem("users", JSON.stringify({
+    admin:{password:"235100",role:"admin"},
+    mostafa:{password:"1111",role:"user"},
+    adi:{password:"2222",role:"user"}
+  }));
+}
+function getUsers(){return JSON.parse(localStorage.getItem("users"));}
+function saveUsers(u){localStorage.setItem("users",JSON.stringify(u));}
 
 /* الأسعار */
 const pricesData={
@@ -153,41 +193,38 @@ const pricesData={
 
 let currentUser="",selectedApp="",selectedPrice="";
 
-/* تسجيل الدخول */
-function login(){
-  const u=username.value.trim().toLowerCase();
-  const p=password.value;
-  if(!users[u]||users[u]!==p){
-    alert("اسم المستخدم أو كلمة السر غير صحيحة");
-    return;
-  }
-  currentUser=u;
-  localStorage.setItem("loggedUser",u);
-  showApp();
+/* استرجاع الجلسة */
+if(localStorage.getItem("loggedUser")){
+  currentUser=localStorage.getItem("loggedUser");
+  afterLogin();
 }
 
-/* إظهار التطبيق */
-function showApp(){
+function login(){
+  let u=username.value.toLowerCase();
+  let p=password.value;
+  let users=getUsers();
+  if(!users[u]||users[u].password!==p) return alert("بيانات غير صحيحة");
+  localStorage.setItem("loggedUser",u);
+  localStorage.setItem("role",users[u].role);
+  currentUser=u;
+  afterLogin();
+}
+
+function afterLogin(){
   loginBox.classList.add("hidden");
   orderBox.classList.remove("hidden");
   historyBox.classList.remove("hidden");
   logoutBtn.style.display="block";
-  welcome.innerText="مرحباً "+currentUser;
+  userName.innerText="مرحباً "+currentUser;
+  if(localStorage.getItem("role")==="admin"){
+    adminBox.classList.remove("hidden");
+    loadUsersList();
+  }
   loadHistory();
 }
 
-/* استرجاع الجلسة */
-window.onload=function(){
-  const saved=localStorage.getItem("loggedUser");
-  if(saved && users[saved]){
-    currentUser=saved;
-    showApp();
-  }
-};
-
-/* تسجيل خروج */
 function logout(){
-  localStorage.removeItem("loggedUser");
+  localStorage.clear();
   location.reload();
 }
 
@@ -213,23 +250,18 @@ function selectApp(app,el){
 
 /* إرسال الطلب */
 function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value){
-    alert("أكمل البيانات");
-    return;
-  }
+  if(!selectedApp||!selectedPrice||!userid.value) return alert("أكمل البيانات");
   let order={user:currentUser,app:selectedApp,price:selectedPrice,id:userid.value,time:new Date().toLocaleString()};
   let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
   arr.push(order);
   localStorage.setItem("orders_"+currentUser,JSON.stringify(arr));
   loadHistory();
-
   if(BOT_TOKEN){
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
   }
   alert("تم إرسال الطلب ✅");
 }
 
-/* ملاحظة */
 function sendNote(){
   let note=prompt("اكتب الملاحظة");
   if(note && BOT_TOKEN){
@@ -242,6 +274,45 @@ function loadHistory(){
   history.innerHTML="";
   let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
   data.forEach(o=>history.innerHTML+=`<div>${o.app} | ${o.price}</div>`);
+}
+
+/* إدارة المستخدمين */
+function addUser(){
+  let u=newUser.value.toLowerCase();
+  let p=newPass.value;
+  if(!u||!p) return alert("أكمل البيانات");
+  let users=getUsers();
+  if(users[u]) return alert("المستخدم موجود");
+  users[u]={password:p,role:"user"};
+  saveUsers(users);
+  newUser.value="";newPass.value="";
+  loadUsersList();
+}
+function loadUsersList(){
+  let users=getUsers();
+  usersList.innerHTML="";
+  Object.keys(users).forEach(u=>{
+    if(u==="admin") return;
+    usersList.innerHTML+=`
+      <div>${u}
+        <button style="float:left;background:#dc2626;color:#fff;border:none;border-radius:5px"
+          onclick="deleteUser('${u}')">حذف</button>
+      </div>`;
+  });
+}
+function deleteUser(u){
+  if(!confirm("حذف المستخدم؟")) return;
+  let users=getUsers();
+  delete users[u];
+  saveUsers(users);
+  loadUsersList();
+}
+
+/* لغة */
+function setLang(l){
+  if(l==="en") loginTitle.innerText="Login";
+  if(l==="tr") loginTitle.innerText="Giriş";
+  if(l==="ar") loginTitle.innerText="تسجيل الدخول";
 }
 </script>
 
