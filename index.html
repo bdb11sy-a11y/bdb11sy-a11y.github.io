@@ -17,6 +17,19 @@ header{
   padding:15px;
   text-align:center;
   font-size:20px;
+  position:relative;
+}
+.logout{
+  position:absolute;
+  left:15px;
+  top:15px;
+  background:#dc2626;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:6px 12px;
+  cursor:pointer;
+  display:none;
 }
 .card{
   background:#fff;
@@ -39,7 +52,7 @@ header{
 }
 .app.active{border-color:#2563eb}
 .app img{width:50px;height:50px}
-select,input,button{
+input,button{
   width:100%;
   padding:10px;
   margin-top:10px;
@@ -69,7 +82,10 @@ button{
 
 <body>
 
-<header>العبادي – شحن التطبيقات</header>
+<header>
+  العبادي – شحن التطبيقات
+  <button class="logout" id="logoutBtn" onclick="logout()">تسجيل خروج</button>
+</header>
 
 <!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
@@ -123,31 +139,16 @@ const CHAT_ID = "154287241";
 
 /* المستخدمين */
 const users = {
-  mostafa: "235100",
-  adi: "2351",
-  abd: "1234"
+  mostafa:"235100",
+  adi:"2351"
 };
 
 /* الأسعار */
 const pricesData={
-  Likee:[
-    "1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL",
-    "3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"
-  ],
-  Yahlan:[
-    "1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL",
-    "10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"
-  ],
-  "4Fun":[
-    "300K 💎 – 950 TL","500K 💎 – 1700 TL",
-    "600K 💎 – 1850 TL","1M 💎 – 3200 TL","1.5M 💎 – 4650 TL"
-  ],
-  Jawaker:[
-    "10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL",
-    "30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL",
-    "100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL",
-    "500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"
-  ]
+  Likee:["1000💎 - 950TL","1500💎 - 1375TL","2000💎 - 1850TL","3000💎 - 2900TL","4000💎 - 3750TL","5000💎 - 4700TL"],
+  Yahlan:["1000💎 - 125TL","2000💎 - 225TL","5000💎 - 475TL","10000💎 - 950TL","20000💎 - 1850TL","50000💎 - 4850TL"],
+  "4Fun":["300K💎 - 950TL","500K💎 - 1700TL","600K💎 - 1850TL","1M💎 - 3200TL","1.5M💎 - 4650TL"],
+  Jawaker:["10K🪙 - 100TL","20K🪙 - 175TL","25K🪙 - 200TL","30K🪙 - 250TL","50K🪙 - 350TL","70K🪙 - 500TL","100K🪙 - 650TL","200K🪙 - 1250TL","300K🪙 - 1850TL","500K🪙 - 3000TL","1M🪙 - 5300TL"]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
@@ -161,11 +162,33 @@ function login(){
     return;
   }
   currentUser=u;
+  localStorage.setItem("loggedUser",u);
+  showApp();
+}
+
+/* إظهار التطبيق */
+function showApp(){
   loginBox.classList.add("hidden");
   orderBox.classList.remove("hidden");
   historyBox.classList.remove("hidden");
-  welcome.innerText="مرحباً "+u;
+  logoutBtn.style.display="block";
+  welcome.innerText="مرحباً "+currentUser;
   loadHistory();
+}
+
+/* استرجاع الجلسة */
+window.onload=function(){
+  const saved=localStorage.getItem("loggedUser");
+  if(saved && users[saved]){
+    currentUser=saved;
+    showApp();
+  }
+};
+
+/* تسجيل خروج */
+function logout(){
+  localStorage.removeItem("loggedUser");
+  location.reload();
 }
 
 /* اختيار التطبيق */
