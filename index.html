@@ -2,30 +2,31 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Alabbadi Services</title>
+<title>العبادي – شحن التطبيقات</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial;
-  background:linear-gradient(#e0f2fe,#f8fafc);
   direction:rtl;
+  background:linear-gradient(#e0f2fe,#f8fafc);
 }
 header{
   background:#0f172a;
   color:#fff;
-  padding:12px 15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  padding:15px;
+  text-align:center;
+  position:relative;
 }
-header span{font-size:14px}
 .logout{
+  position:absolute;
+  left:10px;
+  top:10px;
   background:#dc2626;
   color:#fff;
   border:none;
-  padding:6px 12px;
-  border-radius:6px;
+  padding:8px 14px;
+  border-radius:8px;
   cursor:pointer;
 }
 .card{
@@ -35,22 +36,40 @@ header span{font-size:14px}
   border-radius:12px;
   box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
-.hidden{display:none}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  font-size:16px;
+}
+button{
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.green{background:#22c55e;color:#fff}
+.orange{background:#f59e0b;color:#fff}
 
 .apps{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
+  margin-top:10px;
 }
 .app{
   text-align:center;
   padding:10px;
   border-radius:10px;
-  cursor:pointer;
   border:2px solid transparent;
+  cursor:pointer;
 }
-.app.active{border-color:#2563eb}
-.app img{width:45px;height:45px}
+.app img{
+  width:50px;
+  height:50px;
+}
+.app.active{
+  border-color:#2563eb;
+}
 
 .price{
   padding:10px;
@@ -64,48 +83,41 @@ header span{font-size:14px}
   color:#fff;
 }
 
-input,button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  font-size:15px;
-}
-.green{background:#22c55e;color:#fff;border:none;border-radius:8px}
-.orange{background:#f59e0b;color:#fff;border:none;border-radius:8px}
-.red{background:#dc2626;color:#fff;border:none;border-radius:8px}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
 <header>
-  <span id="headerUser"></span>
-  <span>العبادي – شحن التطبيقات</span>
+  العبادي – شحن التطبيقات
   <button class="logout hidden" id="logoutBtn" onclick="logout()">تسجيل خروج</button>
 </header>
 
 <!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
   <h3>تسجيل الدخول</h3>
-  <input id="loginUser" placeholder="اسم المستخدم">
-  <input id="loginPass" type="password" placeholder="كلمة السر">
+  <input id="username" placeholder="اسم المستخدم">
+  <input id="password" type="password" placeholder="كلمة السر">
   <button class="green" onclick="login()">دخول</button>
 </div>
 
 <!-- الطلب -->
 <div class="card hidden" id="orderBox">
+  <h3 id="welcome"></h3>
+
   <div class="apps">
     <div class="app" onclick="selectApp('likee',this)">
-      <img src="likee.jpg"><div>Likee</div>
+      <img src="likee.jpg"><div>likee</div>
     </div>
     <div class="app" onclick="selectApp('yahlan',this)">
-      <img src="yahlan.jpg"><div>Yahlan</div>
+      <img src="yahlan.jpg"><div>yahlan</div>
     </div>
     <div class="app" onclick="selectApp('4fun',this)">
-      <img src="4fun.jpg"><div>4Fun</div>
+      <img src="4fun.jpg"><div>4fun</div>
     </div>
     <div class="app" onclick="selectApp('jawaker',this)">
-      <img src="jawaker.jpg"><div>Jawaker</div>
+      <img src="jawaker.jpg"><div>jawaker</div>
     </div>
   </div>
 
@@ -121,63 +133,71 @@ input,button{
   </a>
 </div>
 
-<!-- سجل -->
-<div class="card hidden" id="historyBox">
-  <h3>سجل طلباتك</h3>
-  <div id="history"></div>
-</div>
-
 <script>
-/* ضع التوكن */
-const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE";
-const CHAT_ID = "154287241";
+/* ===================== */
+/* 🔴 ضع توكن تلغرام هنا */
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+const CHAT_ID  = "154287241";
+/* ===================== */
 
 /* المستخدمين */
-let users = JSON.parse(localStorage.getItem("users")) || {
-  admin:"235100",
-  mostafa:"1111",
-  adi:"2222"
+const users = {
+  abid: { password:"235100", role:"admin" }
 };
 
-const pricesData={
-  likee:["1000💎 - 950TL","1500💎 - 1375TL","2000💎 - 1850TL","3000💎 - 2900TL","4000💎 - 3750TL","5000💎 - 4700TL"],
-  yahlan:["1000💎 - 125TL","2000💎 - 225TL","5000💎 - 475TL","10000💎 - 950TL","20000💎 - 1850TL","50000💎 - 4850TL"],
-  "4fun":["300K💎 - 950TL","500K💎 - 1700TL","600K💎 - 1850TL","1M💎 - 3200TL","1.5M💎 - 4650TL"],
-  jawaker:["10K🪙 - 100TL","20K🪙 - 175TL","25K🪙 - 200TL","30K🪙 - 250TL","50K🪙 - 350TL","70K🪙 - 500TL","100K🪙 - 650TL","200K🪙 - 1250TL","300K🪙 - 1850TL","500K🪙 - 3000TL","1M🪙 - 5300TL"]
+/* الأسعار */
+const pricesData = {
+  likee:[
+    "1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL",
+    "3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"
+  ],
+  yahlan:[
+    "1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL",
+    "10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"
+  ],
+  "4fun":[
+    "300K💎 – 950TL","500K💎 – 1700TL","600K💎 – 1850TL",
+    "1M💎 – 3200TL","1.5M💎 – 4650TL"
+  ],
+  jawaker:[
+    "10K🪙 – 100TL","20K🪙 – 175TL","25K🪙 – 200TL",
+    "30K🪙 – 250TL","50K🪙 – 350TL","70K🪙 – 500TL",
+    "100K🪙 – 650TL","200K🪙 – 1250TL","300K🪙 – 1850TL",
+    "500K🪙 – 3000TL","1M🪙 – 5300TL"
+  ]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
 
-/* تسجيل دخول */
+/* تسجيل الدخول */
 function login(){
-  let u=loginUser.value.trim();
-  let p=loginPass.value.trim();
-  if(users[u]!==p) return alert("بيانات خاطئة");
-  localStorage.setItem("loggedUser",u);
-  startSession(u);
+  if(!users[username.value] || users[username.value].password!==password.value){
+    alert("بيانات خاطئة");
+    return;
+  }
+  localStorage.setItem("loggedUser",username.value);
+  location.reload();
 }
 
-function startSession(u){
-  currentUser=u;
-  loginBox.classList.add("hidden");
-  orderBox.classList.remove("hidden");
-  historyBox.classList.remove("hidden");
-  logoutBtn.classList.remove("hidden");
-  headerUser.innerText="مرحباً "+u;
-  loadHistory();
-}
+/* تحميل الجلسة */
+window.onload=()=>{
+  const u=localStorage.getItem("loggedUser");
+  if(u){
+    currentUser=u;
+    loginBox.classList.add("hidden");
+    orderBox.classList.remove("hidden");
+    logoutBtn.classList.remove("hidden");
+    welcome.innerText="مرحباً "+u;
+  }
+};
 
-/* خروج */
+/* تسجيل خروج */
 function logout(){
   localStorage.removeItem("loggedUser");
   location.reload();
 }
 
-/* عند فتح الصفحة */
-let saved=localStorage.getItem("loggedUser");
-if(saved) startSession(saved);
-
-/* اختيار تطبيق */
+/* اختيار التطبيق */
 function selectApp(app,el){
   selectedApp=app;
   selectedPrice="";
@@ -199,33 +219,41 @@ function selectApp(app,el){
 
 /* إرسال الطلب */
 function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value) return alert("أكمل البيانات");
-  let order={user:currentUser,app:selectedApp,price:selectedPrice,id:userid.value,time:new Date().toLocaleString()};
-  let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
-  arr.push(order);
-  localStorage.setItem("orders_"+currentUser,JSON.stringify(arr));
-  loadHistory();
-  if(BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
+  if(!selectedApp||!selectedPrice||!userid.value){
+    alert("أكمل البيانات");
+    return;
   }
+
+  let text =
+    "🆕 طلب جديد\n"+
+    "👤 المستخدم: "+currentUser+"\n"+
+    "📱 التطبيق: "+selectedApp+"\n"+
+    "💰 الباقة: "+selectedPrice+"\n"+
+    "🆔 ID: "+userid.value;
+
+  if(BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+    fetch(
+      "https://api.telegram.org/bot"+BOT_TOKEN+
+      "/sendMessage?chat_id="+CHAT_ID+
+      "&text="+encodeURIComponent(text)
+    );
+  }
+
   alert("تم إرسال الطلب ✅");
 }
 
 /* ملاحظة */
 function sendNote(){
-  let note=prompt("اكتب الملاحظة");
-  if(note && BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(note)}`);
+  let n=prompt("اكتب الملاحظة");
+  if(n && BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+    fetch(
+      "https://api.telegram.org/bot"+BOT_TOKEN+
+      "/sendMessage?chat_id="+CHAT_ID+
+      "&text="+encodeURIComponent("ملاحظة:\n"+n)
+    );
   }
-}
-
-/* سجل */
-function loadHistory(){
-  history.innerHTML="";
-  let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
-  data.forEach(o=>history.innerHTML+=`<div>${o.app} | ${o.price}</div>`);
 }
 </script>
 
 </body>
-</html>
+  </html>
