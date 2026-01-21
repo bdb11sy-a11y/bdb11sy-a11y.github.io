@@ -241,7 +241,7 @@ function sendOrder(){
     "💰 الباقة: "+selectedPrice+"\n"+
     "🆔 ID: "+userid.value;
 
-  if(BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+  if(BOT_TOKEN!=="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"){
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
   }
 
