@@ -250,9 +250,16 @@ function sendOrder(){
 
 /* ملاحظة */
 function sendNote(){
-  let n=prompt("اكتب الملاحظة");
-  if(n && BOT_TOKEN!=="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent("ملاحظة:\n"+n)}`);
+  let n = prompt("اكتب الملاحظة");
+  if(!n) return;
+
+  fetch(
+    "https://api.telegram.org/bot"+BOT_TOKEN+
+    "/sendMessage?chat_id="+CHAT_ID+
+    "&text="+encodeURIComponent("📝 ملاحظة:\n"+n)
+  );
+
+  alert("تم إرسال الملاحظة ✅");
   }
 }
 
