@@ -161,7 +161,9 @@ const CHAT_ID  = "154287241";
 /* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
 if(!users){
-  users = { abid:{password:"235100",role:"admin"} };
+  users = {
+    abnabbad:{ password:"199511", role:"admin" }
+  };
   localStorage.setItem("users",JSON.stringify(users));
 }
 
