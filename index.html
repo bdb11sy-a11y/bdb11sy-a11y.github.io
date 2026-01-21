@@ -71,17 +71,15 @@ button{
 
 <header>العبادي – شحن التطبيقات</header>
 
+<!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
   <h3>تسجيل الدخول</h3>
-  <select id="user">
-    <option value="">اختر المستخدم</option>
-    <option value="Mostafa">Mostafa</option>
-    <option value="Adi">Adi</option>
-  </select>
-  <input type="password" id="pass" placeholder="كلمة السر">
+  <input type="text" id="username" placeholder="اسم المستخدم">
+  <input type="password" id="password" placeholder="كلمة السر">
   <button class="green" onclick="login()">دخول</button>
 </div>
 
+<!-- الطلب -->
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
 
@@ -112,36 +110,65 @@ button{
   </a>
 </div>
 
+<!-- سجل -->
 <div class="card hidden" id="historyBox">
   <h3>سجل طلباتك</h3>
   <div id="history"></div>
 </div>
 
 <script>
-const BOT_TOKEN="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
-const CHAT_ID="154287241";
+/* تلغرام (اختياري) */
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+const CHAT_ID = "154287241";
 
-const users={Mostafa:"235100",Adi:"2351"};
+/* المستخدمين */
+const users = {
+  mostafa: "235100",
+  adi: "2351",
+  abd: "1234"
+};
 
+/* الأسعار */
 const pricesData={
-  Likee:["1000💎 - 950TL","1500💎 - 1375TL","2000💎 - 1850TL","3000💎 - 2900TL","4000💎 - 3750TL","5000💎 - 4700TL"],
-  Yahlan:["1000💎 - 125TL","2000💎 - 225TL","5000💎 - 475TL","10000💎 - 950TL","20000💎 - 1850TL","50000💎 - 4850TL"],
-  "4Fun":["300K💎 - 950TL","500K💎 - 1700TL","600K💎 - 1850TL","1M💎 - 3200TL","1.5M💎 - 4650TL"],
-  Jawaker:["10K🪙 - 100TL","20K🪙 - 175TL","25K🪙 - 200TL","30K🪙 - 250TL","50K🪙 - 350TL","70K🪙 - 500TL","100K🪙 - 650TL","200K🪙 - 1250TL","300K🪙 - 1850TL","500K🪙 - 3000TL","1M🪙 - 5300TL"]
+  Likee:[
+    "1000 💎 – 950 TL","1500 💎 – 1375 TL","2000 💎 – 1850 TL",
+    "3000 💎 – 2900 TL","4000 💎 – 3750 TL","5000 💎 – 4700 TL"
+  ],
+  Yahlan:[
+    "1000 💎 – 125 TL","2000 💎 – 225 TL","5000 💎 – 475 TL",
+    "10000 💎 – 950 TL","20000 💎 – 1850 TL","50000 💎 – 4850 TL"
+  ],
+  "4Fun":[
+    "300K 💎 – 950 TL","500K 💎 – 1700 TL",
+    "600K 💎 – 1850 TL","1M 💎 – 3200 TL","1.5M 💎 – 4650 TL"
+  ],
+  Jawaker:[
+    "10K 🪙 – 100 TL","20K 🪙 – 175 TL","25K 🪙 – 200 TL",
+    "30K 🪙 – 250 TL","50K 🪙 – 350 TL","70K 🪙 – 500 TL",
+    "100K 🪙 – 650 TL","200K 🪙 – 1250 TL","300K 🪙 – 1850 TL",
+    "500K 🪙 – 3000 TL","1M 🪙 – 5300 TL"
+  ]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
 
+/* تسجيل الدخول */
 function login(){
-  if(users[user.value]!==pass.value) return alert("كلمة السر خاطئة");
-  currentUser=user.value;
+  const u=username.value.trim().toLowerCase();
+  const p=password.value;
+  if(!users[u]||users[u]!==p){
+    alert("اسم المستخدم أو كلمة السر غير صحيحة");
+    return;
+  }
+  currentUser=u;
   loginBox.classList.add("hidden");
   orderBox.classList.remove("hidden");
   historyBox.classList.remove("hidden");
-  welcome.innerText="مرحباً "+currentUser;
+  welcome.innerText="مرحباً "+u;
   loadHistory();
 }
 
+/* اختيار التطبيق */
 function selectApp(app,el){
   selectedApp=app;
   selectedPrice="";
@@ -161,29 +188,33 @@ function selectApp(app,el){
   });
 }
 
+/* إرسال الطلب */
 function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value) return alert("أكمل البيانات");
-
+  if(!selectedApp||!selectedPrice||!userid.value){
+    alert("أكمل البيانات");
+    return;
+  }
   let order={user:currentUser,app:selectedApp,price:selectedPrice,id:userid.value,time:new Date().toLocaleString()};
   let arr=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
   arr.push(order);
   localStorage.setItem("orders_"+currentUser,JSON.stringify(arr));
   loadHistory();
 
-  if(BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+  if(BOT_TOKEN){
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(JSON.stringify(order,null,2))}`);
   }
-
   alert("تم إرسال الطلب ✅");
 }
 
+/* ملاحظة */
 function sendNote(){
   let note=prompt("اكتب الملاحظة");
-  if(note && BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+  if(note && BOT_TOKEN){
     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(note)}`);
   }
 }
 
+/* سجل */
 function loadHistory(){
   history.innerHTML="";
   let data=JSON.parse(localStorage.getItem("orders_"+currentUser)||"[]");
