@@ -79,7 +79,6 @@ button{
   color:#fff;
 }
 
-/* سعر الصرف */
 #rates{
   position:fixed;
   bottom:0;
@@ -154,20 +153,17 @@ button{
 </div>
 
 <script>
-/* ===== ضع توكن تلغرام هنا ===== */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+/* ===== تلغرام ===== */
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // 👈 حط التوكن هون
 const CHAT_ID  = "154287241";
 
 /* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
 if(!users){
-  users = {
-    abnabbad:{ password:"199511", role:"admin" }
-  };
+  users = { abnabbad:{password:"199511",role:"admin"} };
   localStorage.setItem("users",JSON.stringify(users));
 }
 
-/* ===== الأسعار ===== */
 const pricesData = {
   likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL","3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"],
   yahlan:["1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL","10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"],
@@ -228,7 +224,7 @@ function selectApp(app,el){
   });
 }
 
-/* إرسال الطلب مباشر */
+/* إرسال الطلب */
 function sendOrder(){
   if(!selectedApp||!selectedPrice||!userid.value){
     alert("أكمل البيانات");return;
@@ -241,26 +237,32 @@ function sendOrder(){
     "💰 الباقة: "+selectedPrice+"\n"+
     "🆔 ID: "+userid.value;
 
-  if(BOT_TOKEN!=="8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"){
-    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
-  }
+  fetch("https://api.telegram.org/bot"+BOT_TOKEN+
+    "/sendMessage?chat_id="+CHAT_ID+
+    "&text="+encodeURIComponent(text)
+  );
 
   alert("تم إرسال الطلب ✅");
 }
 
-/* ملاحظة */
+/* ===== إرسال ملاحظة (مزبوط 100%) ===== */
 function sendNote(){
   let n = prompt("اكتب الملاحظة");
   if(!n) return;
 
+  let text =
+    "📝 ملاحظة جديدة\n" +
+    "👤 المستخدم: " + currentUser + "\n" +
+    (selectedApp ? "📱 التطبيق: " + selectedApp + "\n" : "") +
+    "✏️ الملاحظة:\n" + n;
+
   fetch(
-    "https://api.telegram.org/bot"+BOT_TOKEN+
-    "/sendMessage?chat_id="+CHAT_ID+
-    "&text="+encodeURIComponent("📝 ملاحظة:\n"+n)
+    "https://api.telegram.org/bot" + BOT_TOKEN +
+    "/sendMessage?chat_id=" + CHAT_ID +
+    "&text=" + encodeURIComponent(text)
   );
 
   alert("تم إرسال الملاحظة ✅");
-  }
 }
 
 /* إدارة المستخدمين */
@@ -274,7 +276,7 @@ function addUser(){
 function loadUsers(){
   usersList.innerHTML="";
   Object.keys(users).forEach(u=>{
-    if(u==="abid")return;
+    if(u==="abnabbad")return;
     usersList.innerHTML+=`<div>${u}
       <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
   });
@@ -287,4 +289,4 @@ function deleteUser(u){
 </script>
 
 </body>
-      </html>
+  </html>
