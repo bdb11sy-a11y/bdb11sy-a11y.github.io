@@ -37,7 +37,7 @@ header .user{font-size:14px}
 }
 .hidden{display:none}
 
-input,textarea,button,select{
+input,button{
   width:100%;
   padding:10px;
   margin-top:10px;
@@ -113,7 +113,20 @@ button{
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
 
-  <div class="apps" id="appsBox"></div>
+  <div class="apps">
+    <div class="app" onclick="selectApp('likee',this)">
+      <img src="likee.jpg"><div>likee</div>
+    </div>
+    <div class="app" onclick="selectApp('yahlan',this)">
+      <img src="yahlan.jpg"><div>yahlan</div>
+    </div>
+    <div class="app" onclick="selectApp('4fun',this)">
+      <img src="4fun.jpg"><div>4fun</div>
+    </div>
+    <div class="app" onclick="selectApp('jawaker',this)">
+      <img src="jawaker.jpg"><div>jawaker</div>
+    </div>
+  </div>
 
   <div id="prices"></div>
   <input id="userid" placeholder="ID الحساب">
@@ -126,7 +139,7 @@ button{
   </a>
 </div>
 
-<!-- إدارة المستخدمين -->
+<!-- لوحة الأدمن -->
 <div class="card hidden" id="adminBox">
   <h3>إدارة المستخدمين</h3>
   <input id="newUser" placeholder="اسم المستخدم">
@@ -135,57 +148,28 @@ button{
   <div id="usersList"></div>
 </div>
 
-<!-- 🔥 إدارة التطبيقات -->
-<div class="card hidden" id="appsAdminBox">
-  <h3>إدارة التطبيقات</h3>
-
-  <input id="appName" placeholder="اسم التطبيق (small letters)">
-  <input id="appImage" placeholder="رابط صورة التطبيق">
-  <textarea id="appPrices" placeholder="كل سعر بسطر"></textarea>
-
-  <button class="green" onclick="saveApp()">حفظ / تعديل التطبيق</button>
-
-  <select id="deleteAppSelect"></select>
-  <button class="red" onclick="deleteApp()">حذف التطبيق</button>
-</div>
-
 <div id="rates">
   💵 USD: 32.50 TL | 💶 EUR: 35.20 TL
 </div>
 
 <script>
 /* ===== تلغرام ===== */
-const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE";
+const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE"; // 👈 حط التوكن هون
 const CHAT_ID  = "154287241";
 
 /* ===== المستخدمين ===== */
-let users = JSON.parse(localStorage.getItem("users")) || {
-  abnabbad:{password:"199511",role:"admin"}
-};
-localStorage.setItem("users",JSON.stringify(users));
+let users = JSON.parse(localStorage.getItem("users"));
+if(!users){
+  users = { abnabbad:{password:"199511",role:"admin"} };
+  localStorage.setItem("users",JSON.stringify(users));
+}
 
-/* ===== التطبيقات + الأسعار (دمج مو استبدال) ===== */
-let appsData = JSON.parse(localStorage.getItem("appsData")) || {
-  likee:{img:"likee.jpg",prices:[
-    "1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL",
-    "3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"
-  ]},
-  yahlan:{img:"yahlan.jpg",prices:[
-    "1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL",
-    "10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"
-  ]},
-  "4fun":{img:"4fun.jpg",prices:[
-    "300K💎 – 950TL","500K💎 – 1700TL",
-    "600K💎 – 1850TL","1M💎 – 3200TL","1.5M💎 – 4650TL"
-  ]},
-  jawaker:{img:"jawaker.jpg",prices:[
-    "10K🪙 – 100TL","20K🪙 – 175TL","25K🪙 – 200TL",
-    "30K🪙 – 250TL","50K🪙 – 350TL","70K🪙 – 500TL",
-    "100K🪙 – 650TL","200K🪙 – 1250TL",
-    "300K🪙 – 1850TL","500K🪙 – 3000TL","1M🪙 – 5300TL"
-  ]}
+const pricesData = {
+  likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL","3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"],
+  yahlan:["1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL","10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"],
+  "4fun":["300K💎 – 950TL","500K💎 – 1700TL","600K💎 – 1850TL","1M💎 – 3200TL","1.5M💎 – 4650TL"],
+  jawaker:["10K🪙 – 100TL","20K🪙 – 175TL","25K🪙 – 200TL","30K🪙 – 250TL","50K🪙 – 350TL","70K🪙 – 500TL","100K🪙 – 650TL","200K🪙 – 1250TL","300K🪙 – 1850TL","500K🪙 – 3000TL","1M🪙 – 5300TL"]
 };
-localStorage.setItem("appsData",JSON.stringify(appsData));
 
 let currentUser="",selectedApp="",selectedPrice="";
 
@@ -198,7 +182,7 @@ function login(){
   location.reload();
 }
 
-/* تحميل */
+/* تحميل الجلسة */
 window.onload=()=>{
   const u=localStorage.getItem("loggedUser");
   if(u){
@@ -208,83 +192,99 @@ window.onload=()=>{
     logoutBtn.classList.remove("hidden");
     headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
-    loadApps();
     if(users[u].role==="admin"){
       adminBox.classList.remove("hidden");
-      appsAdminBox.classList.remove("hidden");
       loadUsers();
-      loadDeleteApps();
     }
   }
 };
 
+/* تسجيل خروج */
 function logout(){
   localStorage.removeItem("loggedUser");
   location.reload();
 }
 
-/* تحميل التطبيقات */
-function loadApps(){
-  appsBox.innerHTML="";
-  Object.keys(appsData).forEach(a=>{
-    appsBox.innerHTML+=`
-    <div class="app" onclick="selectApp('${a}',this)">
-      <img src="${appsData[a].img}">
-      <div>${a}</div>
-    </div>`;
-  });
-}
-
+/* اختيار التطبيق */
 function selectApp(app,el){
   selectedApp=app;selectedPrice="";
   document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
   el.classList.add("active");
   prices.innerHTML="";
-  appsData[app].prices.forEach(p=>{
+  pricesData[app].forEach(p=>{
     let d=document.createElement("div");
     d.className="price";
     d.innerText=p;
-    d.onclick=()=>{document.querySelectorAll(".price").forEach(x=>x.classList.remove("active"));d.classList.add("active");selectedPrice=p;};
+    d.onclick=()=>{
+      document.querySelectorAll(".price").forEach(x=>x.classList.remove("active"));
+      d.classList.add("active");
+      selectedPrice=p;
+    };
     prices.appendChild(d);
   });
 }
 
-/* إرسال */
+/* إرسال الطلب */
 function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value){alert("أكمل البيانات");return;}
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(
-    "طلب جديد\n"+currentUser+"\n"+selectedApp+"\n"+selectedPrice+"\nID:"+userid.value
-  )}`);
-  alert("تم الإرسال");
+  if(!selectedApp||!selectedPrice||!userid.value){
+    alert("أكمل البيانات");return;
+  }
+
+  let text =
+    "🆕 طلب جديد\n"+
+    "👤 المستخدم: "+currentUser+"\n"+
+    "📱 التطبيق: "+selectedApp+"\n"+
+    "💰 الباقة: "+selectedPrice+"\n"+
+    "🆔 ID: "+userid.value;
+
+  fetch("https://api.telegram.org/bot"+BOT_TOKEN+
+    "/sendMessage?chat_id="+CHAT_ID+
+    "&text="+encodeURIComponent(text)
+  );
+
+  alert("تم إرسال الطلب ✅");
 }
 
+/* ===== إرسال ملاحظة (مزبوط 100%) ===== */
 function sendNote(){
-  let n=prompt("اكتب الملاحظة");
-  if(!n)return;
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`);
-  alert("تم الإرسال");
+  let n = prompt("اكتب الملاحظة");
+  if(!n) return;
+
+  let text =
+    "📝 ملاحظة جديدة\n" +
+    "👤 المستخدم: " + currentUser + "\n" +
+    (selectedApp ? "📱 التطبيق: " + selectedApp + "\n" : "") +
+    "✏️ الملاحظة:\n" + n;
+
+  fetch(
+    "https://api.telegram.org/bot" + BOT_TOKEN +
+    "/sendMessage?chat_id=" + CHAT_ID +
+    "&text=" + encodeURIComponent(text)
+  );
+
+  alert("تم إرسال الملاحظة ✅");
 }
 
-/* إدارة التطبيقات */
-function saveApp(){
-  const name=appName.value.toLowerCase();
-  if(!name)return alert("اسم التطبيق");
-  appsData[name]={img:appImage.value,prices:appPrices.value.split("\n")};
-  localStorage.setItem("appsData",JSON.stringify(appsData));
-  loadApps();loadDeleteApps();
-  alert("تم الحفظ");
+/* إدارة المستخدمين */
+function addUser(){
+  if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
+  users[newUser.value]={password:newPass.value,role:"user"};
+  localStorage.setItem("users",JSON.stringify(users));
+  newUser.value="";newPass.value="";
+  loadUsers();
 }
-
-function loadDeleteApps(){
-  deleteAppSelect.innerHTML="";
-  Object.keys(appsData).forEach(a=>{
-    deleteAppSelect.innerHTML+=`<option value="${a}">${a}</option>`;
+function loadUsers(){
+  usersList.innerHTML="";
+  Object.keys(users).forEach(u=>{
+    if(u==="abnabbad")return;
+    usersList.innerHTML+=`<div>${u}
+      <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
   });
 }
-function deleteApp(){
-  delete appsData[deleteAppSelect.value];
-  localStorage.setItem("appsData",JSON.stringify(appsData));
-  loadApps();loadDeleteApps();
+function deleteUser(u){
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
+  loadUsers();
 }
 </script>
 
