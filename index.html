@@ -240,26 +240,56 @@ function selectApp(app,el){
 }
 
 /* إرسال الطلب */
-function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value){
-    alert("أكمل البيانات");return;
+async function sendOrder(){
+  if(!selectedApp || !selectedPrice || !userid.value){
+    alert("أكمل البيانات");
+    return;
   }
 
-  let text =
-    "🆕 طلب جديد\n"+
-    "👤 المستخدم: "+currentUser+"\n"+
-    "📱 التطبيق: "+selectedApp+"\n"+
-    "💰 الباقة: "+selectedPrice+"\n"+
-    "🆔 ID: "+userid.value;
+  const fileInput = document.getElementById("attachment");
+  const file = fileInput.files[0];
 
-  fetch("https://api.telegram.org/bot"+BOT_TOKEN+
-    "/sendMessage?chat_id="+CHAT_ID+
-    "&text="+encodeURIComponent(text)
-  );
+  let caption =
+    "🆕 طلب جديد\n" +
+    "👤 المستخدم: " + currentUser + "\n" +
+    "📱 التطبيق: " + selectedApp + "\n" +
+    "💰 الباقة: " + selectedPrice + "\n" +
+    "🆔 ID: " + userid.value;
 
-  alert("تم إرسال الطلب ✅");
-}
+  // ===== بدون ملف =====
+  if(!file){
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: caption
+      })
+    });
 
+    alert("تم إرسال الطلب ✅");
+  }
+  // ===== مع ملف =====
+  const formData = new FormData();
+  formData.append("chat_id", CHAT_ID);
+  formData.append("caption", caption);
+
+  if(file.type.startsWith("image/")){
+    formData.append("photo", file);
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+      method: "POST",
+      body: formData
+    });
+  } else {
+    formData.append("document", file);
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+      method: "POST",
+      body: formData
+    });
+  }
+
+  alert("تم إرسال الطلب مع الملف ✅");
+  }
 /* ===== إرسال ملاحظة (مزبوط 100%) ===== */
 function sendNote(){
   let n = prompt("اكتب الملاحظة");
