@@ -154,7 +154,7 @@ button{
 
 <script>
 /* ===== تلغرام ===== */
-const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE"; // 👈 حط التوكن هون
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // 👈 حط التوكن هون
 const CHAT_ID  = "154287241";
 
 /* ===== المستخدمين ===== */
@@ -193,35 +193,21 @@ if(urlUser && urlPass){
     users[urlUser] = { password: urlPass, role: "user" };
     localStorage.setItem("users", JSON.stringify(users));
   }
+  
   localStorage.setItem("loggedUser", urlUser);
   history.replaceState({}, document.title, location.pathname);
 }
-
 /* تحميل الجلسة */
-window.onload = () => {
-
-  const u = localStorage.getItem("loggedUser");
-
-  if (u) {
-    const usersData = JSON.parse(localStorage.getItem("users")) || {};
-
-    // 🔴 إذا المستخدم محذوف أو معطّل → طرد فوري
-    if (!usersData[u] || usersData[u].disabled) {
-      localStorage.removeItem("loggedUser");
-      alert("تم إيقاف حسابك");
-      location.reload();
-      return;
-    }
-
-    // ✅ تسجيل الدخول الطبيعي
-    currentUser = u;
+window.onload=()=>{
+  const u=localStorage.getItem("loggedUser");
+  if(u){
+    currentUser=u;
     loginBox.classList.add("hidden");
     orderBox.classList.remove("hidden");
     logoutBtn.classList.remove("hidden");
-    headerUser.innerText = "مرحباً " + u;
-    welcome.innerText = "مرحباً " + u;
-
-    if (usersData[u].role === "admin") {
+    headerUser.innerText="مرحباً "+u;
+    welcome.innerText="مرحباً "+u;
+    if(users[u].role==="admin"){
       adminBox.classList.remove("hidden");
       loadUsers();
     }
@@ -311,8 +297,8 @@ function loadUsers(){
   });
 }
 function deleteUser(u){
-  users[u].disabled = true;
-  localStorage.setItem("users", JSON.stringify(users));
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
   loadUsers();
 }
 </script>
