@@ -159,9 +159,15 @@ button{
 </div>
 
 <script>
-/* ضع التوكن لاحقًا */
+/* 🔴 ضع التوكن هنا */
 const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
 const CHAT_ID = "154287241";
+
+/* إخفاء نافذة التأكيد عند تحميل الصفحة (حل التعليق) */
+window.onload = function(){
+  const modal = document.getElementById("confirmModal");
+  if(modal) modal.classList.add("hidden");
+};
 
 /* مستخدمين */
 const users={Mostafa:"235100",Adi:"2351"};
