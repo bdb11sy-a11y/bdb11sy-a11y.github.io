@@ -198,16 +198,30 @@ if(urlUser && urlPass){
 }
 
 /* تحميل الجلسة */
-window.onload=()=>{
-  const u=localStorage.getItem("loggedUser");
-  if(u){
-    currentUser=u;
+window.onload = () => {
+
+  const u = localStorage.getItem("loggedUser");
+
+  if (u) {
+    const usersData = JSON.parse(localStorage.getItem("users")) || {};
+
+    // 🔴 إذا المستخدم محذوف أو معطّل → طرد فوري
+    if (!usersData[u] || usersData[u].disabled) {
+      localStorage.removeItem("loggedUser");
+      alert("تم إيقاف حسابك");
+      location.reload();
+      return;
+    }
+
+    // ✅ تسجيل الدخول الطبيعي
+    currentUser = u;
     loginBox.classList.add("hidden");
     orderBox.classList.remove("hidden");
     logoutBtn.classList.remove("hidden");
-    headerUser.innerText="مرحباً "+u;
-    welcome.innerText="مرحباً "+u;
-    if(users[u].role==="admin"){
+    headerUser.innerText = "مرحباً " + u;
+    welcome.innerText = "مرحباً " + u;
+
+    if (usersData[u].role === "admin") {
       adminBox.classList.remove("hidden");
       loadUsers();
     }
@@ -297,8 +311,8 @@ function loadUsers(){
   });
 }
 function deleteUser(u){
-  delete users[u];
-  localStorage.setItem("users",JSON.stringify(users));
+  users[u].disabled = true;
+  localStorage.setItem("users", JSON.stringify(users));
   loadUsers();
 }
 </script>
