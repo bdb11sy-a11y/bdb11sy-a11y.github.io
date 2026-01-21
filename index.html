@@ -149,12 +149,12 @@ button{
 </div>
 
 <div id="rates">
-  💵 USD: 43.50 TL | 💶 EUR: 50.20 TL
+  💵 USD: 32.50 TL | 💶 EUR: 35.20 TL
 </div>
 
 <script>
 /* ===== تلغرام ===== */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // 👈 حط التوكن هون
+const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE"; // 👈 حط التوكن هون
 const CHAT_ID  = "154287241";
 
 /* ===== المستخدمين ===== */
@@ -182,35 +182,6 @@ function login(){
   location.reload();
 }
 
-/* === دعم الدخول من الرابط (حل مشكلة الزبائن) === */
-const params = new URLSearchParams(window.location.search);
-const urlUser = params.get("u");
-const urlPass = params.get("p");
-
-const params = new URLSearchParams(window.location.search);
-const urlUser = params.get("u");
-const urlPass = params.get("p");
-
-/* دخول تلقائي من الرابط – للزبائن فقط */
-if (urlUser && urlPass) {
-
-  // منع الدخول بالرابط للأدمن
-  if (urlUser === "abnabbad") {
-    history.replaceState({}, document.title, location.pathname);
-  } else {
-    let users = JSON.parse(localStorage.getItem("users")) || {};
-
-    if (!users[urlUser]) {
-      users[urlUser] = { password: urlPass, role: "user" };
-      localStorage.setItem("users", JSON.stringify(users));
-    }
-
-    localStorage.setItem("loggedUser", urlUser);
-    history.replaceState({}, document.title, location.pathname);
-    location.reload();
-  }
-}
-  
 /* تحميل الجلسة */
 window.onload=()=>{
   const u=localStorage.getItem("loggedUser");
@@ -295,40 +266,27 @@ function sendNote(){
 }
 
 /* إدارة المستخدمين */
-function loadUsers(){
-  usersList.innerHTML = "";
-
-  Object.keys(users).forEach(u => {
-    if(u === "abnabbad") return;
-
-    const userPass = users[u].password;
-    const userLink =
-      location.origin +
-      location.pathname +
-      "?u=" + encodeURIComponent(u) +
-      "&p=" + encodeURIComponent(userPass);
-
-    usersList.innerHTML += `
-      <div style="margin-bottom:10px;border-bottom:1px solid #ddd;padding-bottom:8px">
-        <b>${u}</b><br>
-        <button class="green" onclick="copyUserLink('${userLink}')">نسخ الرابط</button>
-        <button class="red" onclick="deleteUser('${u}')">حذف</button>
-      </div>
-    `;
-  });
-}
-
-/* حذف مستخدم */
-function deleteUser(u){
-  delete users[u];
-  localStorage.setItem("users", JSON.stringify(users));
+function addUser(){
+  if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
+  users[newUser.value]={password:newPass.value,role:"user"};
+  localStorage.setItem("users",JSON.stringify(users));
+  newUser.value="";newPass.value="";
   loadUsers();
 }
-
-/* نسخ الرابط */
-
-function copyUserLink(link){
-  navigator.clipboard.writeText(link).then(()=>{
-    alert("تم نسخ رابط المستخدم ✅");
+function loadUsers(){
+  usersList.innerHTML="";
+  Object.keys(users).forEach(u=>{
+    if(u==="abnabbad")return;
+    usersList.innerHTML+=`<div>${u}
+      <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
   });
-  }
+}
+function deleteUser(u){
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
+  loadUsers();
+}
+</script>
+
+</body>
+</html>
