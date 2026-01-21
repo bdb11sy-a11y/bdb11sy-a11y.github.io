@@ -241,20 +241,23 @@ function selectApp(app,el){
 
 /* إرسال الطلب */
 async function sendOrder(){
+
+  // التحقق من البيانات
   if(!selectedApp || !selectedPrice || !userid.value){
-    alert("أكمل البيانات");
+    alert("⚠️ أكمل جميع البيانات");
     return;
   }
 
   const fileInput = document.getElementById("attachment");
   const file = fileInput.files[0];
 
-  // 🔴 منع الإرسال بدون إشعار
+  // منع الإرسال بدون إشعار
   if(!file){
     alert("⚠️ يرجى إرفاق إشعار التحويل (Dekont أو لقطة شاشة)");
     return;
   }
 
+  // نص الطلب
   let caption =
     "🆕 طلب جديد\n" +
     "👤 المستخدم: " + currentUser + "\n" +
@@ -262,52 +265,40 @@ async function sendOrder(){
     "💰 الباقة: " + selectedPrice + "\n" +
     "🆔 ID: " + userid.value;
 
+  // تجهيز الإرسال
   const formData = new FormData();
   formData.append("chat_id", CHAT_ID);
   formData.append("caption", caption);
 
-  if(file.type.startsWith("image/")){
-    formData.append("photo", file);
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-      method: "POST",
-      body: formData
-    });
-  } else {
-    formData.append("document", file);
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
-      method: "POST",
-      body: formData
-    });
+  try {
+    if(file.type.startsWith("image/")){
+      formData.append("photo", file);
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: "POST",
+        body: formData
+      });
+    } else {
+      formData.append("document", file);
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+        method: "POST",
+        body: formData
+      });
+    }
+
+    alert("✅ تم إرسال الطلب بنجاح");
+
+    // تنظيف الصفحة بعد الإرسال
+    userid.value = "";
+    fileInput.value = "";
+    selectedApp = "";
+    selectedPrice = "";
+    prices.innerHTML = "";
+    document.querySelectorAll(".app").forEach(a => a.classList.remove("active"));
+
+  } catch (e) {
+    alert("❌ حدث خطأ أثناء الإرسال");
   }
-
-  alert("تم إرسال الطلب مع الإشعار ✅");
-  }
-/* ===== إرسال ملاحظة (مزبوط 100%) ===== */
-function sendNote(){
-  let n = prompt("اكتب شكوتك اسفل");
-  if(!n) return;
-
-  let text =
-    "📝 ملاحظة جديدة\n" +
-    "👤 المستخدم: " + currentUser + "\n" +
-    (selectedApp ? "📱 التطبيق: " + selectedApp + "\n" : "") +
-    "✏️ الملاحظة:\n" + n;
-
-  fetch(
-    "https://api.telegram.org/bot" + BOT_TOKEN +
-    "/sendMessage?chat_id=" + CHAT_ID +
-    "&text=" + encodeURIComponent(text)
-  );
-
-  alert("تم إرسال الطلب مع الإشعار ✅");
-
-// 🔄 تنظيف النموذج بعد الإرسال
-userid.value = "";
-document.getElementById("attachment").value = "";
-selectedApp = "";
-selectedPrice = "";
-document.querySelectorAll(".app").forEach(a => a.classList.remove("active"));
-document.getElementById("prices").innerHTML = "";
+}
 /* إدارة المستخدمين */
 function addUser(){
   if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
