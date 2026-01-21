@@ -14,19 +14,20 @@ body{
 header{
   background:#0f172a;
   color:#fff;
-  padding:15px;
-  text-align:center;
-  position:relative;
+  padding:12px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header .user{
+  font-size:14px;
 }
 .logout{
-  position:absolute;
-  left:10px;
-  top:10px;
   background:#dc2626;
   color:#fff;
   border:none;
-  padding:8px 14px;
-  border-radius:8px;
+  padding:6px 12px;
+  border-radius:6px;
   cursor:pointer;
 }
 .card{
@@ -36,11 +37,13 @@ header{
   border-radius:12px;
   box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
+.hidden{display:none}
+
 input,button{
   width:100%;
   padding:10px;
   margin-top:10px;
-  font-size:16px;
+  font-size:15px;
 }
 button{
   border:none;
@@ -49,12 +52,12 @@ button{
 }
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
+.red{background:#dc2626;color:#fff}
 
 .apps{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
-  margin-top:10px;
 }
 .app{
   text-align:center;
@@ -63,13 +66,8 @@ button{
   border:2px solid transparent;
   cursor:pointer;
 }
-.app img{
-  width:50px;
-  height:50px;
-}
-.app.active{
-  border-color:#2563eb;
-}
+.app img{width:45px;height:45px}
+.app.active{border-color:#2563eb}
 
 .price{
   padding:10px;
@@ -83,14 +81,51 @@ button{
   color:#fff;
 }
 
-.hidden{display:none}
+/* نافذة تأكيد */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+.modal-box{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:320px;
+  text-align:center;
+}
+.modal-actions{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+}
+.modal-actions button{flex:1}
+
+/* سعر الصرف */
+#rates{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0f172a;
+  color:#fff;
+  text-align:center;
+  padding:6px;
+  font-size:14px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  العبادي – شحن التطبيقات
+  <div class="user" id="headerUser"></div>
+  <div>العبادي – شحن التطبيقات</div>
   <button class="logout hidden" id="logoutBtn" onclick="logout()">تسجيل خروج</button>
 </header>
 
@@ -122,10 +157,9 @@ button{
   </div>
 
   <div id="prices"></div>
-
   <input id="userid" placeholder="ID الحساب">
 
-  <button class="green" onclick="sendOrder()">إرسال الطلب</button>
+  <button class="green" onclick="openConfirm()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
 
   <a href="https://wa.me/905396956440">
@@ -133,47 +167,57 @@ button{
   </a>
 </div>
 
+<!-- لوحة الأدمن -->
+<div class="card hidden" id="adminBox">
+  <h3>إدارة المستخدمين</h3>
+  <input id="newUser" placeholder="اسم المستخدم">
+  <input id="newPass" placeholder="كلمة السر">
+  <button class="green" onclick="addUser()">إضافة مستخدم</button>
+  <div id="usersList"></div>
+</div>
+
+<!-- نافذة التأكيد -->
+<div class="modal hidden" id="confirmModal">
+  <div class="modal-box">
+    <h3>تأكيد الطلب</h3>
+    <p id="confirmText"></p>
+    <div class="modal-actions">
+      <button class="red" onclick="closeConfirm()">تعديل</button>
+      <button class="green" onclick="finalSend()">نعم</button>
+    </div>
+  </div>
+</div>
+
+<div id="rates">
+  💵 USD: 32.50 TL | 💶 EUR: 35.20 TL
+</div>
+
 <script>
-/* ===================== */
-/* 🔴 ضع توكن تلغرام هنا */
+/* ===== تلغرام ===== */
 const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
 const CHAT_ID  = "154287241";
-/* ===================== */
 
-/* المستخدمين */
-const users = {
-  abid: { password:"235100", role:"admin" }
-};
+/* ===== المستخدمين ===== */
+let users = JSON.parse(localStorage.getItem("users"));
+if(!users){
+  users = { abid:{password:"235100",role:"admin"} };
+  localStorage.setItem("users",JSON.stringify(users));
+}
 
-/* الأسعار */
+/* ===== الأسعار ===== */
 const pricesData = {
-  likee:[
-    "1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL",
-    "3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"
-  ],
-  yahlan:[
-    "1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL",
-    "10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"
-  ],
-  "4fun":[
-    "300K💎 – 950TL","500K💎 – 1700TL","600K💎 – 1850TL",
-    "1M💎 – 3200TL","1.5M💎 – 4650TL"
-  ],
-  jawaker:[
-    "10K🪙 – 100TL","20K🪙 – 175TL","25K🪙 – 200TL",
-    "30K🪙 – 250TL","50K🪙 – 350TL","70K🪙 – 500TL",
-    "100K🪙 – 650TL","200K🪙 – 1250TL","300K🪙 – 1850TL",
-    "500K🪙 – 3000TL","1M🪙 – 5300TL"
-  ]
+  likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL","3000💎 – 2900TL","4000💎 – 3750TL","5000💎 – 4700TL"],
+  yahlan:["1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL","10000💎 – 950TL","20000💎 – 1850TL","50000💎 – 4850TL"],
+  "4fun":["300K💎 – 950TL","500K💎 – 1700TL","600K💎 – 1850TL","1M💎 – 3200TL","1.5M💎 – 4650TL"],
+  jawaker:["10K🪙 – 100TL","20K🪙 – 175TL","25K🪙 – 200TL","30K🪙 – 250TL","50K🪙 – 350TL","70K🪙 – 500TL","100K🪙 – 650TL","200K🪙 – 1250TL","300K🪙 – 1850TL","500K🪙 – 3000TL","1M🪙 – 5300TL"]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
 
 /* تسجيل الدخول */
 function login(){
-  if(!users[username.value] || users[username.value].password!==password.value){
-    alert("بيانات خاطئة");
-    return;
+  if(!users[username.value]||users[username.value].password!==password.value){
+    alert("بيانات خاطئة");return;
   }
   localStorage.setItem("loggedUser",username.value);
   location.reload();
@@ -187,7 +231,12 @@ window.onload=()=>{
     loginBox.classList.add("hidden");
     orderBox.classList.remove("hidden");
     logoutBtn.classList.remove("hidden");
+    headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
+    if(users[u].role==="admin"){
+      adminBox.classList.remove("hidden");
+      loadUsers();
+    }
   }
 };
 
@@ -197,10 +246,9 @@ function logout(){
   location.reload();
 }
 
-/* اختيار التطبيق */
+/* اختيار تطبيق */
 function selectApp(app,el){
-  selectedApp=app;
-  selectedPrice="";
+  selectedApp=app;selectedPrice="";
   document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
   el.classList.add("active");
   prices.innerHTML="";
@@ -217,41 +265,52 @@ function selectApp(app,el){
   });
 }
 
-/* إرسال الطلب */
-function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value){
-    alert("أكمل البيانات");
-    return;
-  }
+/* تأكيد */
+function openConfirm(){
+  if(!selectedApp||!selectedPrice||!userid.value){alert("أكمل البيانات");return;}
+  confirmText.innerText=`${selectedApp}\n${selectedPrice}\nID: ${userid.value}`;
+  confirmModal.classList.remove("hidden");
+}
+function closeConfirm(){confirmModal.classList.add("hidden");}
 
-  let text =
-    "🆕 طلب جديد\n"+
-    "👤 المستخدم: "+currentUser+"\n"+
-    "📱 التطبيق: "+selectedApp+"\n"+
-    "💰 الباقة: "+selectedPrice+"\n"+
-    "🆔 ID: "+userid.value;
-
+/* إرسال */
+function finalSend(){
+  closeConfirm();
+  let text=`🆕 طلب جديد\n👤 ${currentUser}\n📱 ${selectedApp}\n💰 ${selectedPrice}\n🆔 ${userid.value}`;
   if(BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
-    fetch(
-      "https://api.telegram.org/bot"+BOT_TOKEN+
-      "/sendMessage?chat_id="+CHAT_ID+
-      "&text="+encodeURIComponent(text)
-    );
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`);
   }
-
   alert("تم إرسال الطلب ✅");
 }
 
 /* ملاحظة */
 function sendNote(){
   let n=prompt("اكتب الملاحظة");
-  if(n && BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
-    fetch(
-      "https://api.telegram.org/bot"+BOT_TOKEN+
-      "/sendMessage?chat_id="+CHAT_ID+
-      "&text="+encodeURIComponent("ملاحظة:\n"+n)
-    );
+  if(n&&BOT_TOKEN!=="PUT_YOUR_TOKEN_HERE"){
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent("ملاحظة:\n"+n)}`);
   }
+}
+
+/* إدارة المستخدمين */
+function addUser(){
+  if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
+  users[newUser.value]={password:newPass.value,role:"user"};
+  localStorage.setItem("users",JSON.stringify(users));
+  newUser.value="";newPass.value="";
+  loadUsers();
+}
+function loadUsers(){
+  usersList.innerHTML="";
+  Object.keys(users).forEach(u=>{
+    if(u==="abid")return;
+    usersList.innerHTML+=`<div>${u}
+      <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
+  });
+}
+function deleteUser(u){
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
+  loadUsers();
 }
 </script>
 
