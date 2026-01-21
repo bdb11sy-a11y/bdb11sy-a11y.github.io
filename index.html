@@ -43,7 +43,11 @@ input,button{
   margin-top:10px;
   font-size:15px;
 }
-button{border:none;border-radius:8px;cursor:pointer}
+button{
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
 .red{background:#dc2626;color:#fff}
@@ -70,7 +74,10 @@ button{border:none;border-radius:8px;cursor:pointer}
   margin-top:8px;
   cursor:pointer;
 }
-.price.active{background:#2563eb;color:#fff}
+.price.active{
+  background:#2563eb;
+  color:#fff;
+}
 
 #rates{
   position:fixed;
@@ -107,20 +114,29 @@ button{border:none;border-radius:8px;cursor:pointer}
   <h3 id="welcome"></h3>
 
   <div class="apps">
-    <div class="app" onclick="selectApp('likee',this)"><img src="likee.jpg"><div>likee</div></div>
-    <div class="app" onclick="selectApp('yahlan',this)"><img src="yahlan.jpg"><div>yahlan</div></div>
-    <div class="app" onclick="selectApp('4fun',this)"><img src="4fun.jpg"><div>4fun</div></div>
-    <div class="app" onclick="selectApp('jawaker',this)"><img src="jawaker.jpg"><div>jawaker</div></div>
+    <div class="app" onclick="selectApp('likee',this)">
+      <img src="likee.jpg"><div>likee</div>
+    </div>
+    <div class="app" onclick="selectApp('yahlan',this)">
+      <img src="yahlan.jpg"><div>yahlan</div>
+    </div>
+    <div class="app" onclick="selectApp('4fun',this)">
+      <img src="4fun.jpg"><div>4fun</div>
+    </div>
+    <div class="app" onclick="selectApp('jawaker',this)">
+      <img src="jawaker.jpg"><div>jawaker</div>
+    </div>
   </div>
 
   <div id="prices"></div>
   <input id="userid" placeholder="ID الحساب">
-  <input type="file" id="attachment" accept="image/*,.pdf">
-
+<input type="file" id="attachment" accept="image/*,.pdf">
   <button class="green" onclick="sendOrder()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
 
-  <a href="https://wa.me/905396956440"><button class="green">تواصل واتساب</button></a>
+  <a href="https://wa.me/905396956440">
+    <button class="green">تواصل واتساب</button>
+  </a>
 </div>
 
 <!-- لوحة الأدمن -->
@@ -132,17 +148,19 @@ button{border:none;border-radius:8px;cursor:pointer}
   <div id="usersList"></div>
 </div>
 
-<div id="rates">💵 USD: 32.50 TL | 💶 EUR: 35.20 TL</div>
+<div id="rates">
+  💵 USD: 32.50 TL | 💶 EUR: 35.20 TL
+</div>
 
 <script>
-/* ===== ضع التوكن ===== */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
+/* ===== تلغرام ===== */
+const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw"; // 👈 حط التوكن هون
 const CHAT_ID  = "154287241";
 
 /* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
 if(!users){
-  users = { abnabbad:{password:"199511",role:"admin",balance:999999} };
+  users = { abnabbad:{password:"199511",role:"admin"} };
   localStorage.setItem("users",JSON.stringify(users));
 }
 
@@ -157,12 +175,13 @@ let currentUser="",selectedApp="",selectedPrice="";
 
 /* تسجيل الدخول */
 function login(){
-  if(!users[username.value]||users[username.value].password!==password.value){
+  if(!users[username.value] || users[username.value].password!==password.value){
     alert("بيانات خاطئة");return;
   }
   localStorage.setItem("loggedUser",username.value);
   location.reload();
 }
+
 /* === دعم الدخول من الرابط (حل مشكلة الزبائن) === */
 const params = new URLSearchParams(window.location.search);
 const urlUser = params.get("u");
@@ -174,6 +193,7 @@ if(urlUser && urlPass){
     users[urlUser] = { password: urlPass, role: "user" };
     localStorage.setItem("users", JSON.stringify(users));
   }
+  
   localStorage.setItem("loggedUser", urlUser);
   history.replaceState({}, document.title, location.pathname);
 }
@@ -185,13 +205,20 @@ window.onload=()=>{
     loginBox.classList.add("hidden");
     orderBox.classList.remove("hidden");
     logoutBtn.classList.remove("hidden");
-    headerUser.innerText="مرحباً "+u+" | 💰 رصيدك: "+users[u].balance+" TL";
+    headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
-    if(users[u].role==="admin"){adminBox.classList.remove("hidden");loadUsers();}
+    if(users[u].role==="admin"){
+      adminBox.classList.remove("hidden");
+      loadUsers();
+    }
   }
 };
 
-function logout(){localStorage.removeItem("loggedUser");location.reload();}
+/* تسجيل خروج */
+function logout(){
+  localStorage.removeItem("loggedUser");
+  location.reload();
+}
 
 /* اختيار التطبيق */
 function selectApp(app,el){
@@ -212,46 +239,70 @@ function selectApp(app,el){
   });
 }
 
-/* استخراج السعر */
-function extractPrice(t){
-  const m=t.match(/(\d+)\s*TL/i);
-  return m?parseInt(m[1]):0;
-}
-
 /* إرسال الطلب */
 async function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value){alert("أكمل البيانات");return;}
-  const file=document.getElementById("attachment").files[0];
-  if(!file){alert("يرجى إرفاق إشعار التحويل");return;}
 
-  const price=extractPrice(selectedPrice);
-  if(users[currentUser].balance<price){alert("رصيدك غير كافي");return;}
-  users[currentUser].balance-=price;
-  localStorage.setItem("users",JSON.stringify(users));
+  // التحقق من البيانات
+  if(!selectedApp || !selectedPrice || !userid.value){
+    alert("⚠️ أكمل جميع البيانات");
+    return;
+  }
 
-  const caption=`🆕 طلب جديد\n👤 ${currentUser}\n📱 ${selectedApp}\n💰 ${selectedPrice}\n🆔 ${userid.value}`;
-  const fd=new FormData();
-  fd.append("chat_id",CHAT_ID);
-  fd.append("caption",caption);
+  const fileInput = document.getElementById("attachment");
+  const file = fileInput.files[0];
 
-  if(file.type.startsWith("image")){fd.append("photo",file);await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:"POST",body:fd});}
-  else{fd.append("document",file);await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});}
+  // منع الإرسال بدون إشعار
+  if(!file){
+    alert("⚠️ يرجى إرفاق إشعار التحويل (Dekont أو لقطة شاشة)");
+    return;
+  }
 
-  alert("تم الإرسال");
-  location.reload();
+  // نص الطلب
+  let caption =
+    "🆕 طلب جديد\n" +
+    "👤 المستخدم: " + currentUser + "\n" +
+    "📱 التطبيق: " + selectedApp + "\n" +
+    "💰 الباقة: " + selectedPrice + "\n" +
+    "🆔 ID: " + userid.value;
+
+  // تجهيز الإرسال
+  const formData = new FormData();
+  formData.append("chat_id", CHAT_ID);
+  formData.append("caption", caption);
+
+  try {
+    if(file.type.startsWith("image/")){
+      formData.append("photo", file);
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+        method: "POST",
+        body: formData
+      });
+    } else {
+      formData.append("document", file);
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+        method: "POST",
+        body: formData
+      });
+    }
+
+    alert("✅ تم إرسال الطلب بنجاح");
+
+    // تنظيف الصفحة بعد الإرسال
+    userid.value = "";
+    fileInput.value = "";
+    selectedApp = "";
+    selectedPrice = "";
+    prices.innerHTML = "";
+    document.querySelectorAll(".app").forEach(a => a.classList.remove("active"));
+
+  } catch (e) {
+    alert("❌ حدث خطأ أثناء الإرسال");
+  }
 }
-
-/* ملاحظة */
-function sendNote(){
-  const n=prompt("اكتب الملاحظة");
-  if(!n)return;
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`);
-}
-
 /* إدارة المستخدمين */
 function addUser(){
-  if(!newUser.value||!newPass.value)return;
-  users[newUser.value]={password:newPass.value,role:"user",balance:0};
+  if(!newUser.value||!newPass.value){alert("أكمل البيانات");return;}
+  users[newUser.value]={password:newPass.value,role:"user"};
   localStorage.setItem("users",JSON.stringify(users));
   newUser.value="";newPass.value="";
   loadUsers();
@@ -260,17 +311,16 @@ function loadUsers(){
   usersList.innerHTML="";
   Object.keys(users).forEach(u=>{
     if(u==="abnabbad")return;
-    usersList.innerHTML+=`
-    <div>
-      <b>${u}</b> | 💰 ${users[u].balance} TL
-      <input id="b_${u}" type="number" placeholder="رصيد">
-      <button class="green" onclick="users['${u}'].balance+=parseInt(b_${u}.value||0);localStorage.setItem('users',JSON.stringify(users));loadUsers()">إضافة</button>
-      <button class="red" onclick="deleteUser('${u}')">حذف</button>
-    </div>`;
+    usersList.innerHTML+=`<div>${u}
+      <button class="red" onclick="deleteUser('${u}')">حذف</button></div>`;
   });
 }
-function deleteUser(u){delete users[u];localStorage.setItem("users",JSON.stringify(users));loadUsers();}
+function deleteUser(u){
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
+  loadUsers();
+}
 </script>
 
 </body>
-</html>
+  </html>
