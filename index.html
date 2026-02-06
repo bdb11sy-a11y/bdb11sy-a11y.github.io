@@ -131,22 +131,36 @@ button{
     <div class="app" onclick="selectApp('jawaker',this)">
       <img src="jawaker.jpg"><div>Jawaker</div>
     </div>
-    <!-- تطبيق جديد -->
-    <div class="app" onclick="selectApp('honeyjar',this)">
-      <img src="honey.jpeg"><div>هاني جار</div>
+    <div class="app" onclick="selectApp('donia',this)">
+      <img src="donia.jpeg"><div>Donia</div>
+    </div>
+    <div class="app" onclick="selectApp('honey',this)">
+      <img src="honey.jpeg"><div>Honey</div>
     </div>
   </div>
 
   <div id="prices"></div>
 
   <input id="userid" placeholder="ID الحساب">
+
   <input type="file" id="attachment" accept="image/*,.pdf">
-  <div class="note">يرجى إرفاق إشعار التحويل (Dekont أو لقطة شاشة)</div>
+  <div class="note">⚠️ يرجى إرسال إشعار التحويل (Dekont أو لقطة شاشة)</div>
 
   <button class="green" onclick="sendOrder()">إرسال الطلب</button>
+  <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
+
   <a href="https://wa.me/905396956440">
-    <button class="orange">تواصل واتساب</button>
+    <button class="green">تواصل واتساب</button>
   </a>
+</div>
+
+<!-- لوحة الأدمن -->
+<div class="card hidden" id="adminBox">
+  <h3>إدارة المستخدمين</h3>
+  <input id="newUser" placeholder="اسم المستخدم">
+  <input id="newPass" placeholder="كلمة السر">
+  <button class="green" onclick="addUser()">إضافة مستخدم</button>
+  <div id="usersList"></div>
 </div>
 
 <div id="rates">
@@ -154,23 +168,37 @@ button{
 </div>
 
 <script>
-/* ===== تلغرام ===== */
-const BOT_TOKEN = "PUT_YOUR_TOKEN_HERE";
+/* ===== ضع التوكن والآيدي ===== */
+const BOT_TOKEN = "PUT_YOUR_BOT_TOKEN_HERE";
 const CHAT_ID  = "PUT_CHAT_ID_HERE";
 
 /* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
 if(!users){
-  users = { admin:{password:"1234",role:"admin"} };
+  users = { abnabbad:{password:"199511",role:"admin"} };
   localStorage.setItem("users",JSON.stringify(users));
 }
 
+/* ===== الأسعار ===== */
 const pricesData = {
-  likee:["1000💎 – 950TL","2000💎 – 1850TL","5000💎 – 4700TL"],
-  yahlan:["1000💎 – 125TL","5000💎 – 475TL","10000💎 – 950TL"],
-  "4fun":["300K💎 – 550TL","1M💎 – 2300TL","1.5M💎 – 3050TL"],
-  jawaker:["10K🪙 – 100TL","50K🪙 – 350TL","100K🪙 – 650TL"],
-  honeyjar:["100🍯 – 50TL","250🍯 – 120TL","500🍯 – 220TL","1000🍯 – 400TL"]
+  likee:[
+    "1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"
+  ],
+  yahlan:[
+    "1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL"
+  ],
+  "4fun":[
+    "300K💎 – 550TL","500K💎 – 900TL","1M💎 – 2300TL"
+  ],
+  jawaker:[
+    "10K🪙 – 100TL","50K🪙 – 350TL","100K🪙 – 650TL"
+  ],
+  donia:[
+    "100💎 – 50TL","300💎 – 130TL","1000💎 – 380TL"
+  ],
+  honey:[
+    "50🍯 – 40TL","150🍯 – 110TL","500🍯 – 320TL"
+  ]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
@@ -184,6 +212,7 @@ function login(){
   location.reload();
 }
 
+/* تحميل الجلسة */
 window.onload=()=>{
   const u=localStorage.getItem("loggedUser");
   if(u){
@@ -193,9 +222,14 @@ window.onload=()=>{
     logoutBtn.classList.remove("hidden");
     headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
+    if(users[u].role==="admin"){
+      adminBox.classList.remove("hidden");
+      loadUsers();
+    }
   }
 };
 
+/* خروج */
 function logout(){
   localStorage.removeItem("loggedUser");
   location.reload();
@@ -223,23 +257,23 @@ function selectApp(app,el){
 
 /* إرسال الطلب */
 async function sendOrder(){
-  if(!selectedApp || !selectedPrice || !userid.value){
-    alert("أكمل جميع البيانات"); return;
+  if(!selectedApp||!selectedPrice||!userid.value){
+    alert("أكمل البيانات");return;
   }
 
-  const file = attachment.files[0];
+  const file=document.getElementById("attachment").files[0];
   if(!file){
-    alert("يرجى إرفاق إشعار التحويل"); return;
+    alert("يرجى إرفاق إشعار التحويل");return;
   }
 
-  let caption =
+  let caption=
     "🆕 طلب جديد\n"+
     "👤 المستخدم: "+currentUser+"\n"+
     "📱 التطبيق: "+selectedApp+"\n"+
     "💰 الباقة: "+selectedPrice+"\n"+
     "🆔 ID: "+userid.value;
 
-  const fd = new FormData();
+  const fd=new FormData();
   fd.append("chat_id",CHAT_ID);
   fd.append("caption",caption);
 
@@ -251,7 +285,7 @@ async function sendOrder(){
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});
   }
 
-  alert("تم إرسال الطلب بنجاح ✅");
+  alert("تم إرسال الطلب ✅");
 
   userid.value="";
   attachment.value="";
@@ -259,6 +293,34 @@ async function sendOrder(){
   selectedApp="";
   selectedPrice="";
   document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
+}
+
+/* ملاحظة */
+function sendNote(){
+  let n=prompt("اكتب الملاحظة");
+  if(!n)return;
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`);
+}
+
+/* إدارة المستخدمين */
+function addUser(){
+  if(!newUser.value||!newPass.value)return;
+  users[newUser.value]={password:newPass.value,role:"user"};
+  localStorage.setItem("users",JSON.stringify(users));
+  newUser.value="";newPass.value="";
+  loadUsers();
+}
+function loadUsers(){
+  usersList.innerHTML="";
+  Object.keys(users).forEach(u=>{
+    if(u==="abnabbad")return;
+    usersList.innerHTML+=`${u} <button class="red" onclick="deleteUser('${u}')">حذف</button><br>`;
+  });
+}
+function deleteUser(u){
+  delete users[u];
+  localStorage.setItem("users",JSON.stringify(users));
+  loadUsers();
 }
 </script>
 
