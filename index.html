@@ -187,24 +187,12 @@ if(!users){
 
 /* ===== الأسعار ===== */
 const pricesData = {
-  likee:[
-    "1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"
-  ],
-  yahlan:[
-    "1000💎 – 125TL","2000💎 – 225TL","10000💎 – 1000TL"
-  ],
-  "4fun":[
-    "300K💎 – 550TL","500K💎 – 900TL","1M💎 – 2300TL"
-  ],
-  jawaker:[
-    "10K🪙 – 100TL","50K🪙 – 350TL","100K🪙 – 650TL"
-  ],
-  donia:[
-    "100💎 – 50TL","300💎 – 130TL","1000💎 – 380TL"
-  ],
-  honey:[
-    "1000🍯 – 250TL","1500🍯 – 400TL","5000🍯 – 775TL"
-  ]
+  likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"],
+  yahlan:["1000💎 – 125TL","2000💎 – 225TL","10000💎 – 1000TL"],
+  "4fun":["300K💎 – 550TL","500K💎 – 900TL","1M💎 – 2300TL"],
+  jawaker:["10K🪙 – 100TL","50K🪙 – 350TL","100K🪙 – 650TL"],
+  donia:["100💎 – 50TL","300💎 – 130TL","1000💎 – 380TL"],
+  honey:["1000🍯 – 250TL","1500🍯 – 400TL","5000🍯 – 775TL"]
 };
 
 let currentUser="",selectedApp="",selectedPrice="";
@@ -263,15 +251,16 @@ function selectApp(app,el){
   });
 }
 
-/* حفظ الطلب في السجل */
+/* حفظ الطلب في السجل مع الحالة */
 function saveOrder(order){
   let orders = JSON.parse(localStorage.getItem("orders")) || {};
   if(!orders[currentUser]) orders[currentUser] = [];
+  order.status = order.status || "pending"; // الحالة الافتراضية
   orders[currentUser].push(order);
   localStorage.setItem("orders", JSON.stringify(orders));
 }
 
-/* تحميل سجل الطلبات */
+/* تحميل سجل الطلبات مع أزرار الحالة */
 function loadOrders(){
   let orders = JSON.parse(localStorage.getItem("orders")) || {};
   let userOrders = orders[currentUser] || [];
@@ -282,10 +271,32 @@ function loadOrders(){
   }
   userOrders.forEach((o,i)=>{
     let div = document.createElement("div");
-    div.innerHTML = `${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}`;
     div.style.marginBottom = "6px";
+    div.style.padding = "6px";
+    div.style.border = "1px solid #ddd";
+    div.style.borderRadius = "6px";
+    // اللون حسب الحالة
+    if(o.status==="done") div.style.backgroundColor="#22c55e33";
+    if(o.status==="rejected") div.style.backgroundColor="#dc262633";
+    div.innerHTML = `
+      ${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}<br>
+      <button style="margin:3px;" onclick="updateStatus(${i},'done')">✅ تم الطلب</button>
+      <button style="margin:3px;" onclick="updateStatus(${i},'rejected')">❌ رفض</button>
+    `;
     ordersList.appendChild(div);
   });
+}
+
+/* تحديث حالة الطلب */
+function updateStatus(index,status){
+  let orders = JSON.parse(localStorage.getItem("orders")) || {};
+  let userOrders = orders[currentUser] || [];
+  if(userOrders[index]){
+    userOrders[index].status=status;
+    orders[currentUser] = userOrders;
+    localStorage.setItem("orders", JSON.stringify(orders));
+    loadOrders();
+  }
 }
 
 /* إرسال الطلب */
@@ -317,16 +328,14 @@ async function sendOrder(){
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});
   }
 
-  // حفظ الطلب في السجل
   saveOrder({
-    app: selectedApp,
-    price: selectedPrice,
-    userid: userid.value,
-    date: new Date().toLocaleString()
+    app:selectedApp,
+    price:selectedPrice,
+    userid:userid.value,
+    date:new Date().toLocaleString()
   });
 
   alert("تم إرسال الطلب ✅");
-
   userid.value="";
   attachment.value="";
   prices.innerHTML="";
