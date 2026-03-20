@@ -117,41 +117,21 @@ button{
 <!-- الطلب -->
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
-
   <div class="apps">
-    <div class="app" onclick="selectApp('likee',this)">
-      <img src="likee.jpg"><div>Likee</div>
-    </div>
-    <div class="app" onclick="selectApp('yahlan',this)">
-      <img src="yahlan.jpg"><div>Yahlan</div>
-    </div>
-    <div class="app" onclick="selectApp('4fun',this)">
-      <img src="4fun.jpg"><div>4Fun</div>
-    </div>
-    <div class="app" onclick="selectApp('jawaker',this)">
-      <img src="jawaker.jpg"><div>Jawaker</div>
-    </div>
-    <div class="app" onclick="selectApp('donia',this)">
-      <img src="donia.jpeg"><div>Donia</div>
-    </div>
-    <div class="app" onclick="selectApp('honey',this)">
-      <img src="honey.jpeg"><div>Honey</div>
-    </div>
+    <div class="app" onclick="selectApp('likee',this)"><img src="likee.jpg"><div>Likee</div></div>
+    <div class="app" onclick="selectApp('yahlan',this)"><img src="yahlan.jpg"><div>Yahlan</div></div>
+    <div class="app" onclick="selectApp('4fun',this)"><img src="4fun.jpg"><div>4Fun</div></div>
+    <div class="app" onclick="selectApp('jawaker',this)"><img src="jawaker.jpg"><div>Jawaker</div></div>
+    <div class="app" onclick="selectApp('donia',this)"><img src="donia.jpeg"><div>Donia</div></div>
+    <div class="app" onclick="selectApp('honey',this)"><img src="honey.jpeg"><div>Honey</div></div>
   </div>
-
   <div id="prices"></div>
-
   <input id="userid" placeholder="ID الحساب">
-
   <input type="file" id="attachment" accept="image/*,.pdf">
   <div class="note">⚠️ يرجى إرسال إشعار التحويل (Dekont أو لقطة شاشة)</div>
-
   <button class="green" onclick="sendOrder()">إرسال الطلب</button>
   <button class="orange" onclick="sendNote()">إرسال ملاحظة</button>
-
-  <a href="https://wa.me/905396956440">
-    <button class="green">تواصل واتساب</button>
-  </a>
+  <a href="https://wa.me/905396956440"><button class="green">تواصل واتساب</button></a>
 </div>
 
 <!-- سجل الطلبات -->
@@ -169,23 +149,15 @@ button{
   <div id="usersList"></div>
 </div>
 
-<div id="rates">
-  💵 USD: 43.50 TL | 💶 EUR: 50.63 TL
-</div>
+<div id="rates">💵 USD: 43.50 TL | 💶 EUR: 50.63 TL</div>
 
 <script>
-/* ===== ضع التوكن والآيدي ===== */
 const BOT_TOKEN = "ضع_التوكن_هنا";
 const CHAT_ID  = "ضع_CHAT_ID_هنا";
 
-/* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
-if(!users){
-  users = { abnabbad:{password:"199511",role:"admin"} };
-  localStorage.setItem("users",JSON.stringify(users));
-}
+if(!users){ users = { abnabbad:{password:"199511",role:"admin"} }; localStorage.setItem("users",JSON.stringify(users)); }
 
-/* ===== الأسعار ===== */
 const pricesData = {
   likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"],
   yahlan:["1000💎 – 125TL","2000💎 – 225TL","10000💎 – 1000TL"],
@@ -197,16 +169,11 @@ const pricesData = {
 
 let currentUser="",selectedApp="",selectedPrice="";
 
-/* تسجيل الدخول */
 function login(){
-  if(!users[username.value] || users[username.value].password!==password.value){
-    alert("بيانات خاطئة");return;
-  }
-  localStorage.setItem("loggedUser",username.value);
-  location.reload();
+  if(!users[username.value] || users[username.value].password!==password.value){ alert("بيانات خاطئة"); return; }
+  localStorage.setItem("loggedUser",username.value); location.reload();
 }
 
-/* تحميل الجلسة */
 window.onload=()=>{
   const u=localStorage.getItem("loggedUser");
   if(u){
@@ -217,162 +184,103 @@ window.onload=()=>{
     logoutBtn.classList.remove("hidden");
     headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
-    if(users[u].role==="admin"){
-      adminBox.classList.remove("hidden");
-      loadUsers();
-    }
+    if(users[u].role==="admin"){ adminBox.classList.remove("hidden"); loadUsers(); }
     loadOrders();
   }
 };
 
-/* خروج */
-function logout(){
-  localStorage.removeItem("loggedUser");
-  location.reload();
-}
+function logout(){ localStorage.removeItem("loggedUser"); location.reload(); }
 
-/* اختيار التطبيق */
 function selectApp(app,el){
-  selectedApp=app;
-  selectedPrice="";
+  selectedApp=app; selectedPrice="";
   document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
-  el.classList.add("active");
-  prices.innerHTML="";
+  el.classList.add("active"); prices.innerHTML="";
   pricesData[app].forEach(p=>{
     let d=document.createElement("div");
-    d.className="price";
-    d.innerText=p;
-    d.onclick=()=>{
-      document.querySelectorAll(".price").forEach(x=>x.classList.remove("active"));
-      d.classList.add("active");
-      selectedPrice=p;
-    };
+    d.className="price"; d.innerText=p;
+    d.onclick=()=>{ document.querySelectorAll(".price").forEach(x=>x.classList.remove("active")); d.classList.add("active"); selectedPrice=p; };
     prices.appendChild(d);
   });
 }
 
-/* حفظ الطلب في السجل مع الحالة */
+// حفظ الطلب
 function saveOrder(order){
-  let orders = JSON.parse(localStorage.getItem("orders")) || {};
-  if(!orders[currentUser]) orders[currentUser] = [];
-  order.status = order.status || "pending"; // الحالة الافتراضية
+  let orders=JSON.parse(localStorage.getItem("orders"))||{};
+  if(!orders[currentUser]) orders[currentUser]=[];
+  order.status=order.status||"pending"; // الحالة الافتراضية
   orders[currentUser].push(order);
-  localStorage.setItem("orders", JSON.stringify(orders));
+  localStorage.setItem("orders",JSON.stringify(orders));
 }
 
-/* تحميل سجل الطلبات مع أزرار الحالة */
+// تحميل السجل مع أزرار الحالة للأدمن فقط
 function loadOrders(){
-  let orders = JSON.parse(localStorage.getItem("orders")) || {};
-  let userOrders = orders[currentUser] || [];
-  ordersList.innerHTML = "";
-  if(userOrders.length === 0){
-    ordersList.innerHTML = "لا توجد طلبات سابقة";
-    return;
-  }
+  let orders=JSON.parse(localStorage.getItem("orders"))||{};
+  let userOrders=orders[currentUser]||[];
+  ordersList.innerHTML="";
+  if(userOrders.length===0){ ordersList.innerHTML="لا توجد طلبات سابقة"; return; }
   userOrders.forEach((o,i)=>{
-    let div = document.createElement("div");
-    div.style.marginBottom = "6px";
-    div.style.padding = "6px";
-    div.style.border = "1px solid #ddd";
-    div.style.borderRadius = "6px";
-    // اللون حسب الحالة
+    let div=document.createElement("div");
+    div.style.marginBottom="6px";
+    div.style.padding="6px";
+    div.style.border="1px solid #ddd";
+    div.style.borderRadius="6px";
     if(o.status==="done") div.style.backgroundColor="#22c55e33";
     if(o.status==="rejected") div.style.backgroundColor="#dc262633";
-    div.innerHTML = `
-      ${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}<br>
-      <button style="margin:3px;" onclick="updateStatus(${i},'done')">✅ تم الطلب</button>
-      <button style="margin:3px;" onclick="updateStatus(${i},'rejected')">❌ رفض</button>
-    `;
+    div.innerHTML=`${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}<br>`;
+    if(users[currentUser].role==="admin"){
+      let btnDone=document.createElement("button"); btnDone.innerText="✅ تم الطلب"; btnDone.style.margin="3px"; btnDone.onclick=()=>updateStatus(i,"done");
+      let btnReject=document.createElement("button"); btnReject.innerText="❌ رفض"; btnReject.style.margin="3px"; btnReject.onclick=()=>updateStatus(i,"rejected");
+      div.appendChild(btnDone); div.appendChild(btnReject);
+    }
     ordersList.appendChild(div);
   });
 }
 
-/* تحديث حالة الطلب */
 function updateStatus(index,status){
-  let orders = JSON.parse(localStorage.getItem("orders")) || {};
-  let userOrders = orders[currentUser] || [];
-  if(userOrders[index]){
+  let orders=JSON.parse(localStorage.getItem("orders"))||{};
+  let userOrders=orders[currentUser]||[];
+  if(userOrders[index] && users[currentUser].role==="admin"){
     userOrders[index].status=status;
-    orders[currentUser] = userOrders;
-    localStorage.setItem("orders", JSON.stringify(orders));
+    orders[currentUser]=userOrders;
+    localStorage.setItem("orders",JSON.stringify(orders));
     loadOrders();
   }
 }
 
-/* إرسال الطلب */
+// إرسال الطلب
 async function sendOrder(){
-  if(!selectedApp || !selectedPrice || !userid.value){
-    alert("أكمل البيانات"); return;
-  }
+  if(!selectedApp || !selectedPrice || !userid.value){ alert("أكمل البيانات"); return; }
   const file=document.getElementById("attachment").files[0];
-  if(!file){
-    alert("يرجى إرفاق إشعار التحويل"); return;
-  }
+  if(!file){ alert("يرجى إرفاق إشعار التحويل"); return; }
 
-  let caption=
-    "🆕 طلب جديد\n"+
-    "👤 المستخدم: "+currentUser+"\n"+
-    "📱 التطبيق: "+selectedApp+"\n"+
-    "💰 الباقة: "+selectedPrice+"\n"+
-    "🆔 ID: "+userid.value;
+  let caption="🆕 طلب جديد\n👤 المستخدم: "+currentUser+"\n📱 التطبيق: "+selectedApp+"\n💰 الباقة: "+selectedPrice+"\n🆔 ID: "+userid.value;
+  const fd=new FormData(); fd.append("chat_id",CHAT_ID); fd.append("caption",caption);
+  if(file.type.startsWith("image/")) fd.append("photo",file),await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:"POST",body:fd});
+  else fd.append("document",file),await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});
 
-  const fd=new FormData();
-  fd.append("chat_id",CHAT_ID);
-  fd.append("caption",caption);
-
-  if(file.type.startsWith("image/")){
-    fd.append("photo",file);
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:"POST",body:fd});
-  } else {
-    fd.append("document",file);
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});
-  }
-
-  saveOrder({
-    app:selectedApp,
-    price:selectedPrice,
-    userid:userid.value,
-    date:new Date().toLocaleString()
-  });
-
-  alert("تم إرسال الطلب ✅");
-  userid.value="";
-  attachment.value="";
-  prices.innerHTML="";
-  selectedApp="";
-  selectedPrice="";
-  document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
-
+  saveOrder({ app:selectedApp, price:selectedPrice, userid:userid.value, date:new Date().toLocaleString() });
+  alert("تم إرسال الطلب ✅"); userid.value=""; attachment.value=""; prices.innerHTML=""; selectedApp=""; selectedPrice=""; document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
   loadOrders();
 }
 
-/* ملاحظة */
+// إرسال ملاحظة
 function sendNote(){
-  let n=prompt("اكتب الملاحظة");
-  if(!n)return;
+  let n=prompt("اكتب الملاحظة"); if(!n) return;
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`);
 }
 
-/* إدارة المستخدمين */
+// إدارة المستخدمين
 function addUser(){
-  if(!newUser.value||!newPass.value)return;
+  if(!newUser.value||!newPass.value) return;
   users[newUser.value]={password:newPass.value,role:"user"};
   localStorage.setItem("users",JSON.stringify(users));
-  newUser.value="";newPass.value="";
-  loadUsers();
+  newUser.value=""; newPass.value=""; loadUsers();
 }
 function loadUsers(){
   usersList.innerHTML="";
-  Object.keys(users).forEach(u=>{
-    if(u==="abnabbad")return;
-    usersList.innerHTML+=`${u} <button class="red" onclick="deleteUser('${u}')">حذف</button><br>`;
-  });
+  Object.keys(users).forEach(u=>{ if(u==="abnabbad") return; usersList.innerHTML+=`${u} <button class="red" onclick="deleteUser('${u}')">حذف</button><br>`; });
 }
-function deleteUser(u){
-  delete users[u];
-  localStorage.setItem("users",JSON.stringify(users));
-  loadUsers();
-}
+function deleteUser(u){ delete users[u]; localStorage.setItem("users",JSON.stringify(users)); loadUsers(); }
 </script>
 
 </body>
