@@ -3,101 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <title>العبادي – شحن التطبيقات</title>
-
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  direction:rtl;
-  background:linear-gradient(#e0f2fe,#f8fafc);
-}
-header{
-  background:#0f172a;
-  color:#fff;
-  padding:12px 15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+body{margin:0;font-family:Arial;direction:rtl;background:linear-gradient(#e0f2fe,#f8fafc);}
+header{background:#0f172a;color:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;}
 header .user{font-size:14px}
-.logout{
-  background:#dc2626;
-  color:#fff;
-  border:none;
-  padding:6px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-.card{
-  background:#fff;
-  margin:15px;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,.1);
-}
+.logout{background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+.card{background:#fff;margin:15px;padding:15px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,.1);}
 .hidden{display:none}
-
-input,button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  font-size:15px;
-}
-button{
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
+input,button{width:100%;padding:10px;margin-top:10px;font-size:15px;}
+button{border:none;border-radius:8px;cursor:pointer;}
 .green{background:#22c55e;color:#fff}
 .orange{background:#f59e0b;color:#fff}
 .red{background:#dc2626;color:#fff}
-
-.apps{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-.app{
-  text-align:center;
-  padding:10px;
-  border-radius:10px;
-  border:2px solid transparent;
-  cursor:pointer;
-}
+.apps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.app{text-align:center;padding:10px;border-radius:10px;border:2px solid transparent;cursor:pointer;}
 .app img{width:45px;height:45px}
 .app.active{border-color:#2563eb}
-
-.price{
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin-top:8px;
-  cursor:pointer;
-}
-.price.active{
-  background:#2563eb;
-  color:#fff;
-}
-
-#rates{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#0f172a;
-  color:#fff;
-  text-align:center;
-  padding:6px;
-  font-size:14px;
-}
-.note{
-  color:#dc2626;
-  font-size:14px;
-  margin-top:6px;
-}
+.price{padding:10px;border:1px solid #ddd;border-radius:8px;margin-top:8px;cursor:pointer;}
+.price.active{background:#2563eb;color:#fff;}
+#rates{position:fixed;bottom:0;left:0;right:0;background:#0f172a;color:#fff;text-align:center;padding:6px;font-size:14px;}
+.note{color:#dc2626;font-size:14px;margin-top:6px;}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -106,7 +33,6 @@ button{
   <button class="logout hidden" id="logoutBtn" onclick="logout()">تسجيل خروج</button>
 </header>
 
-<!-- تسجيل الدخول -->
 <div class="card" id="loginBox">
   <h3>تسجيل الدخول</h3>
   <input id="username" placeholder="اسم المستخدم">
@@ -114,7 +40,6 @@ button{
   <button class="green" onclick="login()">دخول</button>
 </div>
 
-<!-- الطلب -->
 <div class="card hidden" id="orderBox">
   <h3 id="welcome"></h3>
   <div class="apps">
@@ -134,13 +59,11 @@ button{
   <a href="https://wa.me/905396956440"><button class="green">تواصل واتساب</button></a>
 </div>
 
-<!-- سجل الطلبات -->
 <div class="card hidden" id="orderHistoryBox">
   <h3>سجل الطلبات</h3>
   <div id="ordersList"></div>
 </div>
 
-<!-- لوحة الأدمن -->
 <div class="card hidden" id="adminBox">
   <h3>إدارة المستخدمين</h3>
   <input id="newUser" placeholder="اسم المستخدم">
@@ -152,27 +75,17 @@ button{
 <div id="rates">💵 USD: 43.50 TL | 💶 EUR: 50.63 TL</div>
 
 <script>
-const BOT_TOKEN = "ضع_التوكن_هنا";
-const CHAT_ID  = "ضع_CHAT_ID_هنا";
+const BOT_TOKEN="ضع_التوكن_هنا";
+const CHAT_ID="ضع_CHAT_ID_هنا";
 
-let users = JSON.parse(localStorage.getItem("users"));
-if(!users){ users = { abnabbad:{password:"199511",role:"admin"} }; localStorage.setItem("users",JSON.stringify(users)); }
+let users=JSON.parse(localStorage.getItem("users"));
+if(!users){ users={ abnabbad:{password:"199511",role:"admin"} }; localStorage.setItem("users",JSON.stringify(users)); }
 
-const pricesData = {
-  likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"],
-  yahlan:["1000💎 – 125TL","2000💎 – 225TL","10000💎 – 1000TL"],
-  "4fun":["300K💎 – 550TL","500K💎 – 900TL","1M💎 – 2300TL"],
-  jawaker:["10K🪙 – 100TL","50K🪙 – 350TL","100K🪙 – 650TL"],
-  donia:["100💎 – 50TL","300💎 – 130TL","1000💎 – 380TL"],
-  honey:["1000🍯 – 250TL","1500🍯 – 400TL","5000🍯 – 775TL"]
-};
+const pricesData={likee:["1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"],yahlan:["1000💎 – 125TL","2000💎 – 225TL","10000💎 – 1000TL"],"4fun":["300K💎 – 550TL","500K💎 – 900TL","1M💎 – 2300TL"],jawaker:["10K🪙 – 100TL","50K🪙 – 350TL","100K🪙 – 650TL"],donia:["100💎 – 50TL","300💎 – 130TL","1000💎 – 380TL"],honey:["1000🍯 – 250TL","1500🍯 – 400TL","5000🍯 – 775TL"]};
 
 let currentUser="",selectedApp="",selectedPrice="";
 
-function login(){
-  if(!users[username.value] || users[username.value].password!==password.value){ alert("بيانات خاطئة"); return; }
-  localStorage.setItem("loggedUser",username.value); location.reload();
-}
+function login(){ if(!users[username.value] || users[username.value].password!==password.value){alert("بيانات خاطئة");return;} localStorage.setItem("loggedUser",username.value);location.reload(); }
 
 window.onload=()=>{
   const u=localStorage.getItem("loggedUser");
@@ -191,60 +104,49 @@ window.onload=()=>{
 
 function logout(){ localStorage.removeItem("loggedUser"); location.reload(); }
 
-function selectApp(app,el){
-  selectedApp=app; selectedPrice="";
-  document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
-  el.classList.add("active"); prices.innerHTML="";
-  pricesData[app].forEach(p=>{
-    let d=document.createElement("div");
-    d.className="price"; d.innerText=p;
-    d.onclick=()=>{ document.querySelectorAll(".price").forEach(x=>x.classList.remove("active")); d.classList.add("active"); selectedPrice=p; };
-    prices.appendChild(d);
-  });
-}
+function selectApp(app,el){ selectedApp=app; selectedPrice=""; document.querySelectorAll(".app").forEach(a=>a.classList.remove("active")); el.classList.add("active"); prices.innerHTML=""; pricesData[app].forEach(p=>{ let d=document.createElement("div"); d.className="price"; d.innerText=p; d.onclick=()=>{document.querySelectorAll(".price").forEach(x=>x.classList.remove("active")); d.classList.add("active"); selectedPrice=p;}; prices.appendChild(d); }); }
 
-// حفظ الطلب
-function saveOrder(order){
-  let orders=JSON.parse(localStorage.getItem("orders"))||{};
-  if(!orders[currentUser]) orders[currentUser]=[];
-  order.status=order.status||"pending"; // الحالة الافتراضية
-  orders[currentUser].push(order);
-  localStorage.setItem("orders",JSON.stringify(orders));
-}
+function saveOrder(order){ let orders=JSON.parse(localStorage.getItem("orders"))||{}; if(!orders[currentUser]) orders[currentUser]=[]; order.status=order.status||"pending"; orders[currentUser].push(order); localStorage.setItem("orders",JSON.stringify(orders)); }
 
-// تحميل السجل مع أزرار الحالة للأدمن فقط
+// تحميل السجل مع الأزرار للأدمن فقط وعرض جميع المستخدمين
 function loadOrders(){
   let orders=JSON.parse(localStorage.getItem("orders"))||{};
-  let userOrders=orders[currentUser]||[];
   ordersList.innerHTML="";
-  if(userOrders.length===0){ ordersList.innerHTML="لا توجد طلبات سابقة"; return; }
-  userOrders.forEach((o,i)=>{
-    let div=document.createElement("div");
-    div.style.marginBottom="6px";
-    div.style.padding="6px";
-    div.style.border="1px solid #ddd";
-    div.style.borderRadius="6px";
-    if(o.status==="done") div.style.backgroundColor="#22c55e33";
-    if(o.status==="rejected") div.style.backgroundColor="#dc262633";
-    div.innerHTML=`${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}<br>`;
-    if(users[currentUser].role==="admin"){
-      let btnDone=document.createElement("button"); btnDone.innerText="✅ تم الطلب"; btnDone.style.margin="3px"; btnDone.onclick=()=>updateStatus(i,"done");
-      let btnReject=document.createElement("button"); btnReject.innerText="❌ رفض"; btnReject.style.margin="3px"; btnReject.onclick=()=>updateStatus(i,"rejected");
-      div.appendChild(btnDone); div.appendChild(btnReject);
-    }
-    ordersList.appendChild(div);
-  });
+  if(users[currentUser].role==="admin"){
+    let i=1;
+    Object.keys(orders).forEach(user=>{
+      orders[user].forEach((o,idx)=>{
+        let div=document.createElement("div");
+        div.style.marginBottom="6px";
+        div.style.padding="6px";
+        div.style.border="1px solid #ddd";
+        div.style.borderRadius="6px";
+        if(o.status==="done") div.style.backgroundColor="#22c55e33";
+        if(o.status==="rejected") div.style.backgroundColor="#dc262633";
+        div.innerHTML=`${i}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date} - المستخدم: ${user}<br>`;
+        let btnDone=document.createElement("button"); btnDone.innerText="✅ تم الطلب"; btnDone.style.margin="3px"; btnDone.onclick=()=>updateStatus(user,idx,"done");
+        let btnReject=document.createElement("button"); btnReject.innerText="❌ رفض"; btnReject.style.margin="3px"; btnReject.onclick=()=>updateStatus(user,idx,"rejected");
+        div.appendChild(btnDone); div.appendChild(btnReject);
+        ordersList.appendChild(div); i++;
+      });
+    });
+  } else {
+    let userOrders=orders[currentUser]||[];
+    if(userOrders.length===0){ ordersList.innerHTML="لا توجد طلبات سابقة"; return; }
+    userOrders.forEach((o,i)=>{
+      let div=document.createElement("div");
+      div.style.marginBottom="6px"; div.style.padding="6px"; div.style.border="1px solid #ddd"; div.style.borderRadius="6px";
+      if(o.status==="done") div.style.backgroundColor="#22c55e33";
+      if(o.status==="rejected") div.style.backgroundColor="#dc262633";
+      div.innerHTML=`${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}<br>`;
+      ordersList.appendChild(div);
+    });
+  }
 }
 
-function updateStatus(index,status){
+function updateStatus(user,index,status){
   let orders=JSON.parse(localStorage.getItem("orders"))||{};
-  let userOrders=orders[currentUser]||[];
-  if(userOrders[index] && users[currentUser].role==="admin"){
-    userOrders[index].status=status;
-    orders[currentUser]=userOrders;
-    localStorage.setItem("orders",JSON.stringify(orders));
-    loadOrders();
-  }
+  if(orders[user] && orders[user][index] && users[currentUser].role==="admin"){ orders[user][index].status=status; orders[user]=orders[user]; localStorage.setItem("orders",JSON.stringify(orders)); loadOrders(); }
 }
 
 // إرسال الطلب
@@ -252,34 +154,21 @@ async function sendOrder(){
   if(!selectedApp || !selectedPrice || !userid.value){ alert("أكمل البيانات"); return; }
   const file=document.getElementById("attachment").files[0];
   if(!file){ alert("يرجى إرفاق إشعار التحويل"); return; }
-
   let caption="🆕 طلب جديد\n👤 المستخدم: "+currentUser+"\n📱 التطبيق: "+selectedApp+"\n💰 الباقة: "+selectedPrice+"\n🆔 ID: "+userid.value;
   const fd=new FormData(); fd.append("chat_id",CHAT_ID); fd.append("caption",caption);
   if(file.type.startsWith("image/")) fd.append("photo",file),await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:"POST",body:fd});
   else fd.append("document",file),await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});
-
   saveOrder({ app:selectedApp, price:selectedPrice, userid:userid.value, date:new Date().toLocaleString() });
   alert("تم إرسال الطلب ✅"); userid.value=""; attachment.value=""; prices.innerHTML=""; selectedApp=""; selectedPrice=""; document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
   loadOrders();
 }
 
 // إرسال ملاحظة
-function sendNote(){
-  let n=prompt("اكتب الملاحظة"); if(!n) return;
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`);
-}
+function sendNote(){ let n=prompt("اكتب الملاحظة"); if(!n) return; fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(n)}`); }
 
 // إدارة المستخدمين
-function addUser(){
-  if(!newUser.value||!newPass.value) return;
-  users[newUser.value]={password:newPass.value,role:"user"};
-  localStorage.setItem("users",JSON.stringify(users));
-  newUser.value=""; newPass.value=""; loadUsers();
-}
-function loadUsers(){
-  usersList.innerHTML="";
-  Object.keys(users).forEach(u=>{ if(u==="abnabbad") return; usersList.innerHTML+=`${u} <button class="red" onclick="deleteUser('${u}')">حذف</button><br>`; });
-}
+function addUser(){ if(!newUser.value||!newPass.value) return; users[newUser.value]={password:newPass.value,role:"user"}; localStorage.setItem("users",JSON.stringify(users)); newUser.value=""; newPass.value=""; loadUsers(); }
+function loadUsers(){ usersList.innerHTML=""; Object.keys(users).forEach(u=>{ if(u==="abnabbad") return; usersList.innerHTML+=`${u} <button class="red" onclick="deleteUser('${u}')">حذف</button><br>`; }); }
 function deleteUser(u){ delete users[u]; localStorage.setItem("users",JSON.stringify(users)); loadUsers(); }
 </script>
 
