@@ -154,6 +154,12 @@ button{
   </a>
 </div>
 
+<!-- سجل الطلبات -->
+<div class="card hidden" id="orderHistoryBox">
+  <h3>سجل الطلبات</h3>
+  <div id="ordersList"></div>
+</div>
+
 <!-- لوحة الأدمن -->
 <div class="card hidden" id="adminBox">
   <h3>إدارة المستخدمين</h3>
@@ -169,8 +175,8 @@ button{
 
 <script>
 /* ===== ضع التوكن والآيدي ===== */
-const BOT_TOKEN = "8313946628:AAHSXwgg619cSyYom9-abBN_eyOnfQzQWfw";
-const CHAT_ID  = "154287241";
+const BOT_TOKEN = "ضع_التوكن_هنا";
+const CHAT_ID  = "ضع_CHAT_ID_هنا";
 
 /* ===== المستخدمين ===== */
 let users = JSON.parse(localStorage.getItem("users"));
@@ -185,7 +191,7 @@ const pricesData = {
     "1000💎 – 950TL","1500💎 – 1375TL","2000💎 – 1850TL"
   ],
   yahlan:[
-    "1000💎 – 125TL","2000💎 – 225TL","5000💎 – 475TL"
+    "1000💎 – 125TL","2000💎 – 225TL","10000💎 – 1000TL"
   ],
   "4fun":[
     "300K💎 – 550TL","500K💎 – 900TL","1M💎 – 2300TL"
@@ -219,6 +225,7 @@ window.onload=()=>{
     currentUser=u;
     loginBox.classList.add("hidden");
     orderBox.classList.remove("hidden");
+    orderHistoryBox.classList.remove("hidden");
     logoutBtn.classList.remove("hidden");
     headerUser.innerText="مرحباً "+u;
     welcome.innerText="مرحباً "+u;
@@ -226,6 +233,7 @@ window.onload=()=>{
       adminBox.classList.remove("hidden");
       loadUsers();
     }
+    loadOrders();
   }
 };
 
@@ -255,15 +263,39 @@ function selectApp(app,el){
   });
 }
 
+/* حفظ الطلب في السجل */
+function saveOrder(order){
+  let orders = JSON.parse(localStorage.getItem("orders")) || {};
+  if(!orders[currentUser]) orders[currentUser] = [];
+  orders[currentUser].push(order);
+  localStorage.setItem("orders", JSON.stringify(orders));
+}
+
+/* تحميل سجل الطلبات */
+function loadOrders(){
+  let orders = JSON.parse(localStorage.getItem("orders")) || {};
+  let userOrders = orders[currentUser] || [];
+  ordersList.innerHTML = "";
+  if(userOrders.length === 0){
+    ordersList.innerHTML = "لا توجد طلبات سابقة";
+    return;
+  }
+  userOrders.forEach((o,i)=>{
+    let div = document.createElement("div");
+    div.innerHTML = `${i+1}. ${o.app} - ${o.price} - ID: ${o.userid} - ${o.date}`;
+    div.style.marginBottom = "6px";
+    ordersList.appendChild(div);
+  });
+}
+
 /* إرسال الطلب */
 async function sendOrder(){
-  if(!selectedApp||!selectedPrice||!userid.value){
-    alert("أكمل البيانات");return;
+  if(!selectedApp || !selectedPrice || !userid.value){
+    alert("أكمل البيانات"); return;
   }
-
   const file=document.getElementById("attachment").files[0];
   if(!file){
-    alert("يرجى إرفاق إشعار التحويل");return;
+    alert("يرجى إرفاق إشعار التحويل"); return;
   }
 
   let caption=
@@ -280,10 +312,18 @@ async function sendOrder(){
   if(file.type.startsWith("image/")){
     fd.append("photo",file);
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`,{method:"POST",body:fd});
-  }else{
+  } else {
     fd.append("document",file);
     await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`,{method:"POST",body:fd});
   }
+
+  // حفظ الطلب في السجل
+  saveOrder({
+    app: selectedApp,
+    price: selectedPrice,
+    userid: userid.value,
+    date: new Date().toLocaleString()
+  });
 
   alert("تم إرسال الطلب ✅");
 
@@ -293,6 +333,8 @@ async function sendOrder(){
   selectedApp="";
   selectedPrice="";
   document.querySelectorAll(".app").forEach(a=>a.classList.remove("active"));
+
+  loadOrders();
 }
 
 /* ملاحظة */
